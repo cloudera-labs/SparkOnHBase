@@ -36,13 +36,14 @@ object HBaseBulkGetExample {
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"))
 
     val hbaseContext = new HBaseContext(conf);
+    
     var getRdd = hbaseContext.bulkGets[Array[Byte], String](
       tableName,
       2,
       rdd,
-      record => { System.out.println("making Get" )
+      record => { 
+        System.out.println("making Get" )
         new Get(record)
-      
       },
       (result: Result) => {
 
@@ -63,6 +64,7 @@ object HBaseBulkGetExample {
         B.toString
       })
       
+    
     getRdd.collect.foreach(v => System.out.println(v))
     
   }

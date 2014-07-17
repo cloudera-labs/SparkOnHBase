@@ -10,12 +10,15 @@ Current functionality supports the following functions
 * bulkIncrement
 * bulkDelete
 * bulkGet
-* foreach (with HConnection)
+* foreachPartition (with HConnection)
+* mapPartition (with HConnection)
+* Clean wrapper over HBaseInputFormat
 
 ##Future
 In the coming weeks this will have
 
-* Clean wrapper over HBaseInputFormat
+* Unit Tests
+* Java Examples
 * Spark implementation of HBase bulkLoad
 * Spark implementation of HBase copyTable
 * Sorted Partitioned Bulk Get
@@ -36,4 +39,5 @@ SparkOnHBase comes with a number of examples.  Here is the Cli commands to try t
 * java -cp SparkHBase.jar spark.hbase.example.HBaseBulkIncrementsExample spark://{spark.master.host}:7077  t1 c
 * java -cp SparkHBase.jar spark.hbase.example.HBaseBulkPutExample spark://{spark.master.host}:7077  t1 c
 * java -cp SparkHBase.jar spark.hbase.example.HBaseBulkDeletesExample spark://{spark.master.host}:7077 t1 c
+* java -cp SparkHBase.jar spark.hbase.example.HBaseDistributedScanExample spark://tedmalaska-exp-b-1.ent.cloudera.com:7077 t1 c
 
