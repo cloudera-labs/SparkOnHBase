@@ -35,11 +35,11 @@ object HBaseBulkIncrementExample {
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
     	
-      val hbaseContext = new HBaseContext(conf);
-      hbaseContext.bulkIncrements[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])](rdd, 
+      val hbaseContext = new HBaseContext(sc, conf);
+      hbaseContext.bulkIncrement[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])](rdd, 
           tableName,
           (incrementRecord) => {
-            var increment = new Increment(incrementRecord._1)
+            val increment = new Increment(incrementRecord._1)
             incrementRecord._2.foreach((incrementValue) => 
               increment.addColumn(incrementValue._1, incrementValue._2, incrementValue._3))
             increment

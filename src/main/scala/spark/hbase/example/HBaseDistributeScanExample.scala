@@ -28,12 +28,12 @@ object HBaseDistributedScanExample {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"))
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"))
 
-    val hbaseContext = new HBaseContext(conf)
+    val hbaseContext = new HBaseContext(sc, conf)
     
     var scan = new Scan()
     scan.setCaching(100)
     
-    var getRdd = hbaseContext.distributedScan(sc, tableName, scan)
+    var getRdd = hbaseContext.distributedScan(tableName, scan)
     
     getRdd.collect.foreach(v => System.out.println(Bytes.toString(v._1)))
     

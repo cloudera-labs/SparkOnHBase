@@ -35,9 +35,9 @@ object HBaseBulkGetExample {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"))
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"))
 
-    val hbaseContext = new HBaseContext(conf);
+    val hbaseContext = new HBaseContext(sc, conf);
     
-    var getRdd = hbaseContext.bulkGets[Array[Byte], String](
+    val getRdd = hbaseContext.bulkGet[Array[Byte], String](
       tableName,
       2,
       rdd,
@@ -47,14 +47,14 @@ object HBaseBulkGetExample {
       },
       (result: Result) => {
 
-        var it = result.list().iterator()
+        val it = result.list().iterator()
         val B = new StringBuilder
 
         B.append(Bytes.toString(result.getRow()) + ":")
 
         while (it.hasNext()) {
-          var kv = it.next()
-          var q = Bytes.toString(kv.getQualifier())
+          val kv = it.next()
+          val q = Bytes.toString(kv.getQualifier())
           if (q.equals("counter")) {
             B.append("(" + Bytes.toString(kv.getQualifier()) + "," + Bytes.toLong(kv.getValue()) + ")")
           } else {

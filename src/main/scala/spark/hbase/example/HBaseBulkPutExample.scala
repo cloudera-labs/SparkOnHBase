@@ -35,11 +35,11 @@ object HBaseBulkPutExample {
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
     	
-      val hbaseContext = new HBaseContext(conf);
-      hbaseContext.bulkPuts[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])](rdd, 
+      val hbaseContext = new HBaseContext(sc, conf);
+      hbaseContext.bulkPut[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])](rdd, 
           tableName,
           (putRecord) => {
-            var put = new Put(putRecord._1)
+            val put = new Put(putRecord._1)
             putRecord._2.foreach((putValue) => put.add(putValue._1, putValue._2, putValue._3))
             put
           },

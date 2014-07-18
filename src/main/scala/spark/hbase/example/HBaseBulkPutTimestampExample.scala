@@ -17,7 +17,6 @@ object HBaseBulkPutTimestampExample {
     val master = args(0);
     val tableName = args(1);
     val columnFamily = args(2);
-    
 
     val sc = new SparkContext(master, "HBaseBulkPutTimestampExample");
     sc.addJar("SparkHBase.jar")
@@ -33,13 +32,13 @@ object HBaseBulkPutTimestampExample {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
 
-    var timeStamp = System.currentTimeMillis()
-    
-    val hbaseContext = new HBaseContext(conf);
-    hbaseContext.bulkPuts[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])](rdd,
+    val timeStamp = System.currentTimeMillis()
+
+    val hbaseContext = new HBaseContext(sc, conf);
+    hbaseContext.bulkPut[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])](rdd,
       tableName,
       (putRecord) => {
-        var put = new Put(putRecord._1)
+        val put = new Put(putRecord._1)
         putRecord._2.foreach((putValue) => put.add(putValue._1, putValue._2, timeStamp, putValue._3))
         put
       },
