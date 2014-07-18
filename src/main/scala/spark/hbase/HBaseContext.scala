@@ -36,9 +36,19 @@ import org.apache.hadoop.hbase.mapreduce.KeyValueSerialization
 import org.apache.spark.rdd.HadoopRDD
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.SerializableWritable
+import java.util.HashMap
+import org.apache.hadoop.hbase.protobuf.generated.MasterProtos
+import org.apache.hadoop.hbase.protobuf.generated.MasterProtos
+import java.util.concurrent.atomic.AtomicInteger
+import org.apache.hadoop.hbase.HConstants
+import java.util.concurrent.atomic.AtomicLong
+import java.util.Timer
+import java.util.TimerTask
 
 @serializable class HBaseContext(@transient sc: SparkContext, broadcastedConf: Broadcast[SerializableWritable[Configuration]]) {
-
+  
+  
+  
   def this(@transient sc: SparkContext, @transient config: Configuration) {
     this(sc, sc.broadcast(new SerializableWritable(config)))
   }
@@ -160,26 +170,35 @@ import org.apache.spark.SerializableWritable
       classOf[Result]).map(f)
   }
 
-  private def hbaseForeachPartition[T](config: Broadcast[SerializableWritable[Configuration]],
+  private def hbaseForeachPartition[T](configBroadcast: Broadcast[SerializableWritable[Configuration]],
     it: Iterator[T],
     f: (Iterator[T], HConnection) => Unit) = {
 
-    val hConnection = HConnectionManager.createConnection(config.value.value)
-
-    f(it, hConnection)
-
-    hConnection.close()
+    val config = configBroadcast.value.value
+    
+    val hConnection = HConnectionStaticCache.getHConnection(config)
+    try {
+      f(it, hConnection)
+    } finally {
+      HConnectionStaticCache.finishWithHConnection(config, hConnection)
+    }
   }
 
-  private def hbaseMapPartition[K, U](config: Broadcast[SerializableWritable[Configuration]],
+  private def hbaseMapPartition[K, U](configBroadcast: Broadcast[SerializableWritable[Configuration]],
     it: Iterator[K],
     mp: (Iterator[K], HConnection) => Iterator[U]): Iterator[U] = {
 
-    val hConnection = HConnectionManager.createConnection(config.value.value)
+    val config = configBroadcast.value.value
+    
+    val hConnection = HConnectionStaticCache.getHConnection(config)
 
-    val res = mp(it, hConnection)
-
-    hConnection.close()
-    res
+    try {
+      val res = mp(it, hConnection)
+      res
+    } finally {
+      HConnectionStaticCache.finishWithHConnection(config, hConnection)
+    }
   }
-}
+  
+  
+  }
