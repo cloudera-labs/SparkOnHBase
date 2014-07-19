@@ -36,7 +36,7 @@ object HBaseBulkIncrementExample {
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
     	
       val hbaseContext = new HBaseContext(sc, conf);
-      hbaseContext.bulkIncrement[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])](rdd, 
+      hbaseContext.bulkMutation[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])](rdd, 
           tableName,
           (incrementRecord) => {
             val increment = new Increment(incrementRecord._1)
@@ -44,6 +44,6 @@ object HBaseBulkIncrementExample {
               increment.addColumn(incrementValue._1, incrementValue._2, incrementValue._3))
             increment
           },
-          true);
+          4);
 	}
 }

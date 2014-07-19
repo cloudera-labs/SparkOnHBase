@@ -44,6 +44,8 @@ import org.apache.hadoop.hbase.HConstants
 import java.util.concurrent.atomic.AtomicLong
 import java.util.Timer
 import java.util.TimerTask
+import org.apache.hadoop.hbase.client.Mutation
+import scala.collection.mutable.MutableList
 
 @serializable class HBaseContext(@transient sc: SparkContext, broadcastedConf: Broadcast[SerializableWritable[Configuration]]) {
   
@@ -79,28 +81,25 @@ import java.util.TimerTask
         }))
   }
 
-  def bulkIncrement[T](rdd: RDD[T], tableName: String, f: (T) => Increment, autoFlush: Boolean) {
+  def bulkMutation[T](rdd: RDD[T], tableName: String, f: (T) => Mutation, batchSize: Integer) {
     rdd.foreachPartition(
       it => hbaseForeachPartition[T](
         broadcastedConf,
         it,
         (iterator, hConnection) => {
           val htable = hConnection.getTable(tableName)
-          htable.setAutoFlush(autoFlush, true)
-          iterator.foreach(T => htable.increment(f(T)))
-          htable.close()
-        }))
-  }
-
-  def bulkDelete[T](rdd: RDD[T], tableName: String, f: (T) => Delete, autoFlush: Boolean) {
-    rdd.foreachPartition(
-      it => hbaseForeachPartition[T](
-        broadcastedConf,
-        it,
-        (iterator, hConnection) => {
-          val htable = hConnection.getTable(tableName)
-          htable.setAutoFlush(autoFlush, true)
-          iterator.foreach(T => htable.delete(f(T)))
+          val mutationList = new ArrayList[Mutation]
+          iterator.foreach(T => {
+            mutationList.add(f(T))
+            if (mutationList.size >= batchSize) {
+              htable.batch(mutationList)
+              mutationList.clear()
+            }
+          })
+          if (mutationList.size() > 0) {
+            htable.batch(mutationList)
+            mutationList.clear()
+          }
           htable.close()
         }))
   }
