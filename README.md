@@ -7,21 +7,27 @@ This is a simple reusable lib for working with HBase with Spark
 Current functionality supports the following functions
 
 * bulkPut
-* bulkIncrement
-* bulkDelete
+* bulkMutation
 * bulkGet
 * foreachPartition (with HConnection)
 * mapPartition (with HConnection)
 * Clean wrapper over HBaseInputFormat
 
-##Future
-In the coming weeks this will have
+##Near Future
 
+* JavaDoc
+* Spark Streaming Examples
 * Unit Tests
 * Java Examples
+
+##Far Future
+
+* Partitioned Bulk Put/Mutation
+* Sorted Partitioned Bulk Get
 * Spark implementation of HBase bulkLoad
 * Spark implementation of HBase copyTable
-* Sorted Partitioned Bulk Get
+
+
 
 ##Build
 just mvn clean package
