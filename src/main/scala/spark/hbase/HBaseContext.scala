@@ -46,23 +46,61 @@ import java.util.Timer
 import java.util.TimerTask
 import org.apache.hadoop.hbase.client.Mutation
 import scala.collection.mutable.MutableList
+import org.apache.spark.streaming.dstream.DStream
 
-@serializable class HBaseContext(@transient sc: SparkContext, broadcastedConf: Broadcast[SerializableWritable[Configuration]]) {
-  
-  
-  
+/**
+ * HBaseContext is a façade of simple and complex HBase operations
+ * like bulk put, get, increment, delete, and scan
+ *
+ * HBase Context will take the responsibilities to happen to
+ * complexity of disseminating the configuration information
+ * to the working and managing the life cycle of HConnections.
+ *
+ * First constructor:
+ *
+ *  sc - active SparkContext
+ *
+ *  broadcastedConf - This is a Broadcast object that holds a
+ * serializable Configuration object
+ *
+ */
+@serializable class HBaseContext(@transient sc: SparkContext,
+  broadcastedConf: Broadcast[SerializableWritable[Configuration]]) {
+
+  /**
+   * Second constructor option:
+   *  sc - active SparkContext
+   *  config - Configuration object to make connection to HBase
+   */
   def this(@transient sc: SparkContext, @transient config: Configuration) {
     this(sc, sc.broadcast(new SerializableWritable(config)))
   }
 
-  def foreachPartition[T](rdd: RDD[T], f: (Iterator[T], HConnection) => Unit) = {
-    rdd.foreachPartition(it => hbaseForeachPartition(broadcastedConf, it, f))
-  } 
+  def foreachPartition[T](rdd: RDD[T],
+    f: (Iterator[T], HConnection) => Unit) = {
+    rdd.foreachPartition(
+      it => hbaseForeachPartition(broadcastedConf, it, f))
+  }
+
+  def streamForeach[T](dstream: DStream[T],
+    f: (Iterator[T], HConnection) => Unit) = {
+    dstream.foreach((rdd, time) => {
+      foreachPartition(rdd, f)
+    })
+  }
 
   def mapPartition[T, U: ClassTag](rdd: RDD[T],
     mp: (Iterator[T], HConnection) => Iterator[U]): RDD[U] = {
 
     rdd.mapPartitions[U](it => hbaseMapPartition[T, U](broadcastedConf,
+      it,
+      mp), true)
+  }
+
+  def streamMapPartition[T, U: ClassTag](dstream: DStream[T],
+    mp: (Iterator[T], HConnection) => Iterator[U]): DStream[U] = {
+
+    dstream.mapPartitions(it => hbaseMapPartition[T, U](broadcastedConf,
       it,
       mp), true)
   }
@@ -79,6 +117,15 @@ import scala.collection.mutable.MutableList
           iterator.foreach(T => htable.put(f(T)))
           htable.close()
         }))
+  }
+
+  def streamBulkPut[T](dstream: DStream[T],
+    tableName: String,
+    f: (T) => Put,
+    autoFlush: Boolean) = {
+    dstream.foreach((rdd, time) => {
+      bulkPut(rdd, tableName, f, autoFlush)
+    })
   }
 
   def bulkMutation[T](rdd: RDD[T], tableName: String, f: (T) => Mutation, batchSize: Integer) {
@@ -104,13 +151,112 @@ import scala.collection.mutable.MutableList
         }))
   }
 
-  def bulkGet[K, U: ClassTag](tableName: String,
+  def streamBulkMutation[T](dstream: DStream[T],
+    tableName: String,
+    f: (T) => Mutation,
+    batchSize: Integer) = {
+    dstream.foreach((rdd, time) => {
+      bulkMutation(rdd, tableName, f, batchSize)
+    })
+  }
+
+  def streamBulkGet[T, U: ClassTag](tableName: String,
+      batchSize:Integer,
+      dstream: DStream[T],
+      makeGet: (T) => Get, 
+      convertResult: (Result) => U): DStream[U] = {
+
+    val getMapPartition = new GetMapPartition(tableName,
+      batchSize,
+      makeGet,
+      convertResult)
+
+    dstream.mapPartitions[U](it => hbaseMapPartition[T, U](broadcastedConf,
+      it,
+      getMapPartition.run), true)
+  }
+
+  def bulkGet[T, U: ClassTag](tableName: String,
     batchSize: Integer,
-    rdd: RDD[K],
-    makeGet: (K) => Get,
+    rdd: RDD[T],
+    makeGet: (T) => Get,
     convertResult: (Result) => U): RDD[U] = {
 
-    def mp(iterator: Iterator[K], hConnection: HConnection): Iterator[U] = {
+    val getMapPartition = new GetMapPartition(tableName,
+      batchSize,
+      makeGet,
+      convertResult)
+
+    rdd.mapPartitions[U](it => hbaseMapPartition[T, U](broadcastedConf,
+      it,
+      getMapPartition.run), true)
+  }
+
+  def distributedScan(tableName: String, scans: Scan): RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
+    distributedScan[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](
+      tableName,
+      scans,
+      (r: (ImmutableBytesWritable, Result)) => {
+        val it = r._2.list().iterator()
+        val list = new ArrayList[(Array[Byte], Array[Byte], Array[Byte])]()
+
+        while (it.hasNext()) {
+          val kv = it.next()
+          list.add((kv.getFamily(), kv.getQualifier(), kv.getValue()))
+        }
+
+        (r._1.copyBytes(), list)
+      })
+  }
+
+  def distributedScan[U: ClassTag](tableName: String, scan: Scan, f: ((ImmutableBytesWritable, Result)) => U): RDD[U] = {
+
+    var job: Job = new Job(broadcastedConf.value.value)
+
+    TableMapReduceUtil.initTableMapperJob(tableName, scan, classOf[IdentityTableMapper], null, null, job)
+
+    sc.newAPIHadoopRDD(job.getConfiguration(),
+      classOf[TableInputFormat],
+      classOf[ImmutableBytesWritable],
+      classOf[Result]).map(f)
+  }
+
+  private def hbaseForeachPartition[T](configBroadcast: Broadcast[SerializableWritable[Configuration]],
+    it: Iterator[T],
+    f: (Iterator[T], HConnection) => Unit) = {
+
+    val config = configBroadcast.value.value
+
+    val hConnection = HConnectionStaticCache.getHConnection(config)
+    try {
+      f(it, hConnection)
+    } finally {
+      HConnectionStaticCache.finishWithHConnection(config, hConnection)
+    }
+  }
+
+  private def hbaseMapPartition[K, U](configBroadcast: Broadcast[SerializableWritable[Configuration]],
+    it: Iterator[K],
+    mp: (Iterator[K], HConnection) => Iterator[U]): Iterator[U] = {
+
+    val config = configBroadcast.value.value
+
+    val hConnection = HConnectionStaticCache.getHConnection(config)
+
+    try {
+      val res = mp(it, hConnection)
+      res
+    } finally {
+      HConnectionStaticCache.finishWithHConnection(config, hConnection)
+    }
+  }
+  
+  @serializable private  class GetMapPartition[T, U: ClassTag](tableName: String, 
+      batchSize: Integer,
+      makeGet: (T) => Get,
+      convertResult: (Result) => U) {
+    
+    def run(iterator: Iterator[T], hConnection: HConnection): Iterator[U] = {
       val htable = hConnection.getTable(tableName)
 
       val gets = new ArrayList[Get]()
@@ -132,72 +278,6 @@ import scala.collection.mutable.MutableList
       }
       htable.close()
       res.iterator
-      
-    }
-
-    rdd.mapPartitions[U](it => hbaseMapPartition[K, U](broadcastedConf,
-      it,
-      mp), true)
-  }
-
-  def distributedScan(tableName: String, scans: Scan): RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
-    distributedScan[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](
-      tableName,
-      scans,
-      (r: (ImmutableBytesWritable, Result)) => {
-        val it = r._2.list().iterator()
-        val list = new ArrayList[(Array[Byte], Array[Byte], Array[Byte])]()
-
-        while (it.hasNext()) {
-          val kv = it.next()
-          list.add((kv.getFamily(), kv.getQualifier(), kv.getValue()))
-        }
-
-        (r._1.copyBytes(), list)
-      })
-  }
-
-  def distributedScan[U: ClassTag]( tableName: String, scan: Scan, f: ((ImmutableBytesWritable, Result)) => U): RDD[U] = {
-
-    var job: Job = new Job(broadcastedConf.value.value)
-
-    TableMapReduceUtil.initTableMapperJob(tableName, scan, classOf[IdentityTableMapper], null, null, job)
-    
-    sc.newAPIHadoopRDD(job.getConfiguration(),
-      classOf[TableInputFormat],
-      classOf[ImmutableBytesWritable],
-      classOf[Result]).map(f)
-  }
-
-  private def hbaseForeachPartition[T](configBroadcast: Broadcast[SerializableWritable[Configuration]],
-    it: Iterator[T],
-    f: (Iterator[T], HConnection) => Unit) = {
-
-    val config = configBroadcast.value.value
-    
-    val hConnection = HConnectionStaticCache.getHConnection(config)
-    try {
-      f(it, hConnection)
-    } finally {
-      HConnectionStaticCache.finishWithHConnection(config, hConnection)
     }
   }
-
-  private def hbaseMapPartition[K, U](configBroadcast: Broadcast[SerializableWritable[Configuration]],
-    it: Iterator[K],
-    mp: (Iterator[K], HConnection) => Iterator[U]): Iterator[U] = {
-
-    val config = configBroadcast.value.value
-    
-    val hConnection = HConnectionStaticCache.getHConnection(config)
-
-    try {
-      val res = mp(it, hConnection)
-      res
-    } finally {
-      HConnectionStaticCache.finishWithHConnection(config, hConnection)
-    }
-  }
-  
-  
-  }
+}
