@@ -23,12 +23,14 @@ object SimpleStreamingExample {
       
       val sparkConf = new SparkConf();
       
-      sparkConf.set("spark.driver.port", akkaPort)
+      sparkConf.set("spark.cleaner.ttl", "120000");
       
       val sc = new SparkContext(master, "SimpleStreamingExample", sparkConf)
       sc.addJar("SparkHBase.jar")
       
-      val ssc = new StreamingContext(sc.getConf, Seconds(1))
+      
+      val ssc = new StreamingContext(sc, Seconds(1))
+      
       
       val lines = ssc.socketTextStream(host, Integer.parseInt(port))
       

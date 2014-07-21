@@ -8,6 +8,7 @@ import org.apache.hadoop.hbase.client.Put
 import spark.hbase.HBaseContext
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
+import org.apache.spark.SparkConf
 
 object HBaseStreamingBulkPutExample {
   def main(args: Array[String]) {
@@ -21,7 +22,6 @@ object HBaseStreamingBulkPutExample {
       val port = args(2);
       val tableName = args(3);
       val columnFamily = args(4);
-      val driverPort = args(5);
       
       System.out.println("master:" + master)
       System.out.println("host:" + host)
@@ -29,13 +29,14 @@ object HBaseStreamingBulkPutExample {
       System.out.println("tableName:" + tableName)
       System.out.println("columnFamily:" + columnFamily)
       
-      val sc = new SparkContext(master, "HBaseStreamingBulkPutExample")
+      val sparkConf = new SparkConf();
+      
+      sparkConf.set("spark.cleaner.ttl", "120000");
+      
+      val sc = new SparkContext(master, "HBaseStreamingBulkPutExample", sparkConf)
       sc.addJar("SparkHBase.jar")
       
-      sc.getConf.set("spark.master.port", driverPort);
-      sc.getConf.set("spark.driver.port", driverPort);
-      
-      val ssc = new StreamingContext(sc.getConf, Seconds(1))
+      val ssc = new StreamingContext(sc, Seconds(1))
       
       val lines = ssc.socketTextStream(host, Integer.parseInt(port))
       
@@ -48,11 +49,15 @@ object HBaseStreamingBulkPutExample {
       hbaseContext.streamBulkPut[String](lines, 
           tableName,
           (putRecord) => {
-            val put = new Put(Bytes.toBytes(putRecord))
-            put.add(Bytes.toBytes("c"), Bytes.toBytes("foo"), Bytes.toBytes("bar"))
-            put
+            if (putRecord.length() > 0) {
+              val put = new Put(Bytes.toBytes(putRecord))
+              put.add(Bytes.toBytes("c"), Bytes.toBytes("foo"), Bytes.toBytes("bar"))
+              put
+            } else {
+              null
+            }
           },
-          true);
+          false);
       
       ssc.start();
       
