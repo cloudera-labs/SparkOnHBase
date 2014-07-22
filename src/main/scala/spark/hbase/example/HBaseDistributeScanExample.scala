@@ -33,7 +33,7 @@ object HBaseDistributedScanExample {
     var scan = new Scan()
     scan.setCaching(100)
     
-    var getRdd = hbaseContext.distributedScan(tableName, scan)
+    var getRdd = hbaseContext.hbaseRDD(tableName, scan)
     
     getRdd.collect.foreach(v => System.out.println(Bytes.toString(v._1)))
     

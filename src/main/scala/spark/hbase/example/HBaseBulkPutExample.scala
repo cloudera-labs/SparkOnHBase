@@ -29,7 +29,7 @@ object HBaseBulkPutExample {
             (Bytes.toBytes("4"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("1"), Bytes.toBytes("4")))),
             (Bytes.toBytes("5"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("1"), Bytes.toBytes("5"))))
            )
-          );
+          )
     	
       val conf = HBaseConfiguration.create();
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));

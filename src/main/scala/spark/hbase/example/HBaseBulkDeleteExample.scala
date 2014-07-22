@@ -35,7 +35,7 @@ object HBaseBulkDeleteExample {
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
     	
       val hbaseContext = new HBaseContext(sc, conf);
-      hbaseContext.bulkMutation[Array[Byte]](rdd, 
+      hbaseContext.bulkDelete[Array[Byte]](rdd, 
           tableName,
           putRecord => new Delete(putRecord),
           4);
