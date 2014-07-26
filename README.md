@@ -16,7 +16,8 @@ Current functionality supports the following functions
 
 ##Near Future
 
-* Unit Tests
+* More Junit
+* Cleaner Pom
 * Java Examples
 
 ##Far Future
