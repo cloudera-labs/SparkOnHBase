@@ -27,6 +27,7 @@ import org.apache.hadoop.hbase.HConstants
 import org.apache.hadoop.hbase.client.HConnectionManager
 import java.util.TimerTask
 import scala.collection.mutable.MutableList
+import org.apache.spark.Logging
 
 /**
  * A static caching class that will manage all HConnection in a worker
@@ -45,7 +46,7 @@ import scala.collection.mutable.MutableList
  * 
  * This class is not intended to be used by Users
  */
-object HConnectionStaticCache {
+object HConnectionStaticCache extends Logging{
   @transient private val hconnectionMap = 
     new HashMap[String, (HConnection, AtomicInteger, AtomicLong)]
 
@@ -62,7 +63,6 @@ object HConnectionStaticCache {
     val instanceId = config.get(HConstants.HBASE_CLIENT_INSTANCE_ID)
     var hconnectionAndCounter = hconnectionMap.get(instanceId)
     if (hconnectionAndCounter == null) {
-      
       hconnectionMap.synchronized {
         hconnectionAndCounter = hconnectionMap.get(instanceId)
         if (hconnectionAndCounter == null) {
@@ -70,10 +70,12 @@ object HConnectionStaticCache {
           val hConnection = HConnectionManager.createConnection(config)
           hconnectionAndCounter = (hConnection, new AtomicInteger, new AtomicLong)
           hconnectionMap.put(instanceId, hconnectionAndCounter)
+          
         }
       }
+      logDebug("Created hConnection '" + instanceId +"'");
     } else {
-      //logging
+      logDebug("Get hConnection from cache '" + instanceId +"'");
     }
     
     hconnectionAndCounter._2.incrementAndGet()
@@ -87,8 +89,12 @@ object HConnectionStaticCache {
     val instanceId = config.get(HConstants.HBASE_CLIENT_INSTANCE_ID)
     
     var hconnectionAndCounter = hconnectionMap.get(instanceId)
-    if (hconnectionAndCounter._2.decrementAndGet() == 0) {
+    val usesLeft = hconnectionAndCounter._2.decrementAndGet()
+    if (usesLeft == 0) {
       hconnectionAndCounter._3.set(System.currentTimeMillis())
+      logDebug("Finished last use of hconnection '" + instanceId +"'");
+    } else {
+      logDebug("Finished a use of hconnection '" + instanceId +"' with " + usesLeft + " uses left");
     }
     
   }
@@ -98,6 +104,9 @@ object HConnectionStaticCache {
    */
   protected class hconnectionCleanerTask extends TimerTask {
     override def run() {
+      
+      logDebug("Running hconnectionCleanerTask:" + hconnectionMap.entrySet().size());
+      
       val it = hconnectionMap.entrySet().iterator()
 
       val removeList = new MutableList[String]
@@ -117,7 +126,7 @@ object HConnectionStaticCache {
             if (v._2.get() == 0 && 
                 v._3.get() + 60000 < System.currentTimeMillis()) {
               
-              println("closing hconnection: " + key);
+              logDebug("closing hconnection: " + key);
               
               v._1.close()
               

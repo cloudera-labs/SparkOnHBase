@@ -478,16 +478,13 @@ import org.apache.hadoop.hbase.HBaseTestingUtility
     it: Iterator[T],
     f: (Iterator[T], HConnection) => Unit) = {
 
-    System.out.println("hbaseForeachPartition - enter")
     val config = configBroadcast.value.value
 
     val hConnection = HConnectionStaticCache.getHConnection(config)
     try {
       f(it, hConnection)
     } finally {
-      System.out.println("hbaseForeachPartition - leave")
       HConnectionStaticCache.finishWithHConnection(config, hConnection)
-      
     }
   }
 
