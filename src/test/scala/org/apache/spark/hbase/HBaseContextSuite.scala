@@ -57,7 +57,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
 
   test("bulkput to test HBase client") {
     val config = htu.getConfiguration
-    sc = new SparkContext()
+    val sc = new SparkContext("local", "test")
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("1"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo1")))),
       (Bytes.toBytes("2"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("b"), Bytes.toBytes("foo2")))),
@@ -104,8 +104,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
 
   test("bulkIncrement to test HBase client") {
     val config = htu.getConfiguration
-    
-    sc = new SparkContext()
+    sc = new SparkContext("local", "test")
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("1"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 1L))),
       (Bytes.toBytes("2"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 2L))),
@@ -174,8 +173,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     put = new Put(Bytes.toBytes("delete3"))
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo3"))
     htable.put(put)
-
-    sc = new SparkContext()
+    sc = new SparkContext("local", "test")
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("delete1")),
       (Bytes.toBytes("delete3"))))
@@ -210,14 +208,12 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     put = new Put(Bytes.toBytes("get3"))
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo3"))
     htable.put(put)
-
+    sc = new SparkContext("local", "test")
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("get1")),
       (Bytes.toBytes("get2")),
       (Bytes.toBytes("get3")),
       (Bytes.toBytes("get4"))))
-
-    sc = new SparkContext()
     val hbaseContext = new HBaseContext(sc, config);
 
     val getRdd = hbaseContext.bulkGet[Array[Byte], String](
@@ -280,6 +276,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     put = new Put(Bytes.toBytes("scan5"))
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo3"))
     htable.put(put)
+    
     
     sc = new SparkContext("local", "test")
     val hbaseContext = new HBaseContext(sc, config)
