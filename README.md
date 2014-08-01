@@ -48,3 +48,6 @@ SparkOnHBase comes with a number of examples.  Here is the Cli commands to try t
 * java -cp SparkHBase.jar spark.hbase.example.HBaseBulkDeletesExample spark://{spark.master.host}:7077 t1 c
 * java -cp SparkHBase.jar spark.hbase.example.HBaseDistributedScanExample spark://tedmalaska-exp-b-1.ent.cloudera.com:7077 t1 c
 
+sbt/sbt assembly 'test-only org.apache.spark.hbase*'
+
+

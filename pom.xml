@@ -14,180 +14,153 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-
 	<dependencies>
 		<dependency>
 			<groupId>org.scalatest</groupId>
 			<artifactId>scalatest_2.10</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>14.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-client</artifactId>
-			<version>2.3.0-cdh5.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
-
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-common</artifactId>
-			<version>2.3.0-cdh5.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-common</artifactId>
-			<version>2.3.0-cdh5.1.0</version>
-			<type>test-jar</type>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>2.1.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.10</artifactId>
 			<version>1.0.0-cdh5.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.eclipse.jetty.orbit</groupId>
-					<artifactId>javax.servlet</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-streaming_2.10</artifactId>
 			<version>1.0.0-cdh5.1.0</version>
 			<type>test-jar</type>
+			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-streaming_2.10</artifactId>
 			<version>1.0.0-cdh5.1.0</version>
-
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-client</artifactId>
 			<version>0.98.1-cdh5.1.0</version>
-			<!-- <scope>compile</scope> -->
-			<exclusions>
-				<exclusion>
-					<groupId>io.netty</groupId>
-					<artifactId>netty</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-common</artifactId>
+			<artifactId>hbase-client</artifactId>
 			<version>0.98.1-cdh5.1.0</version>
 			<type>test-jar</type>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet.jsp</groupId>
-					<artifactId>jsp-api</artifactId>
-				</exclusion>
-
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-common</artifactId>
-			<version>0.98.1-cdh5.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet.jsp</groupId>
-					<artifactId>jsp-api</artifactId>
-				</exclusion>
-
-			</exclusions>
+			<classifier>tests</classifier>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-server</artifactId>
 			<version>0.98.1-cdh5.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet.jsp</groupId>
-					<artifactId>jsp-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-server</artifactId>
 			<version>0.98.1-cdh5.1.0</version>
 			<type>test-jar</type>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet.jsp</groupId>
-					<artifactId>jsp-api</artifactId>
-				</exclusion>
-			</exclusions>
+			<classifier>tests</classifier>
 		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
-		</dependency>
-
-
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-hadoop-compat</artifactId>
+			<artifactId>hbase-hadoop2-compat</artifactId>
 			<version>0.98.1-cdh5.1.0</version>
-			<type>test-jar</type>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-hadoop2-compat</artifactId>
 			<version>0.98.1-cdh5.1.0</version>
 			<type>test-jar</type>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-common</artifactId>
+			<version>0.98.1-cdh5.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-common</artifactId>
+			<version>0.98.1-cdh5.1.0</version>
+			<type>test-jar</type>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-hadoop-compat</artifactId>
+			<version>0.98.1-cdh5.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-hadoop-compat</artifactId>
+			<version>0.98.1-cdh5.1.0</version>
+			<type>test-jar</type>
+			<classifier>tests</classifier>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+
+	<!-- <dependencies> <dependency> <groupId>org.scala-lang</groupId> <artifactId>scala-compiler</artifactId> 
+		<version>2.10.4</version> </dependency> <dependency> <groupId>org.scalatest</groupId> 
+		<artifactId>scalatest_2.10</artifactId> <version>2.2.0</version> </dependency> 
+		<dependency> <groupId>com.typesafe.akka</groupId> <artifactId>akka-actor_2.10</artifactId> 
+		<version>2.2.4</version> </dependency> <dependency> <groupId>com.typesafe.akka</groupId> 
+		<artifactId>akka-remote_2.10</artifactId> <version>2.2.4</version> </dependency> 
+		<dependency> <groupId>com.typesafe.akka</groupId> <artifactId>akka-slf4j_2.10</artifactId> 
+		<version>2.2.4</version> </dependency> <dependency> <groupId>com.google.guava</groupId> 
+		<artifactId>guava</artifactId> <version>14.0.1</version> </dependency> <dependency> 
+		<groupId>org.apache.hadoop</groupId> <artifactId>hadoop-client</artifactId> 
+		<version>2.3.0-cdh5.1.0</version> <exclusions> <exclusion> <groupId>com.google.guava</groupId> 
+		<artifactId>guava</artifactId> </exclusion> <exclusion> <groupId>javax.servlet</groupId> 
+		<artifactId>servlet-api</artifactId> </exclusion> </exclusions> </dependency> 
+		<dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-common</artifactId> 
+		<version>2.3.0-cdh5.1.0</version> <exclusions> <exclusion> <groupId>javax.servlet</groupId> 
+		<artifactId>servlet-api</artifactId> </exclusion> </exclusions> </dependency> 
+		<dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-common</artifactId> 
+		<version>2.3.0-cdh5.1.0</version> <type>test-jar</type> <exclusions> <exclusion> 
+		<groupId>javax.servlet</groupId> <artifactId>servlet-api</artifactId> </exclusion> 
+		</exclusions> </dependency> <dependency> <groupId>org.apache.spark</groupId> 
+		<artifactId>spark-core_2.10</artifactId> <version>1.0.0-cdh5.1.0</version> 
+		<exclusions> <exclusion> <groupId>org.eclipse.jetty.orbit</groupId> <artifactId>javax.servlet</artifactId> 
+		</exclusion> </exclusions> </dependency> <dependency> <groupId>org.apache.spark</groupId> 
+		<artifactId>spark-streaming_2.10</artifactId> <version>1.0.0-cdh5.1.0</version> 
+		<type>test-jar</type> <scope>test</scope> </dependency> <dependency> <groupId>org.apache.spark</groupId> 
+		<artifactId>spark-streaming_2.10</artifactId> <version>1.0.0-cdh5.1.0</version> 
+		</dependency> <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase-client</artifactId> 
+		<version>0.98.1-cdh5.1.0</version> <scope>compile</scope> <exclusions> <exclusion> 
+		<groupId>io.netty</groupId> <artifactId>netty</artifactId> </exclusion> </exclusions> 
+		</dependency> <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase-common</artifactId> 
+		<version>0.98.1-cdh5.1.0</version> <type>test-jar</type> <exclusions> <exclusion> 
+		<groupId>javax.servlet</groupId> <artifactId>servlet-api</artifactId> </exclusion> 
+		<exclusion> <groupId>javax.servlet.jsp</groupId> <artifactId>jsp-api</artifactId> 
+		</exclusion> </exclusions> </dependency> <dependency> <groupId>org.apache.hbase</groupId> 
+		<artifactId>hbase-common</artifactId> <version>0.98.1-cdh5.1.0</version> 
+		<exclusions> <exclusion> <groupId>javax.servlet</groupId> <artifactId>servlet-api</artifactId> 
+		</exclusion> <exclusion> <groupId>javax.servlet.jsp</groupId> <artifactId>jsp-api</artifactId> 
+		</exclusion> </exclusions> </dependency> <dependency> <groupId>org.apache.hbase</groupId> 
+		<artifactId>hbase-server</artifactId> <version>0.98.1-cdh5.1.0</version> 
+		<exclusions> <exclusion> <groupId>javax.servlet</groupId> <artifactId>servlet-api</artifactId> 
+		</exclusion> <exclusion> <groupId>javax.servlet.jsp</groupId> <artifactId>jsp-api</artifactId> 
+		</exclusion> </exclusions> </dependency> <dependency> <groupId>org.apache.hbase</groupId> 
+		<artifactId>hbase-server</artifactId> <version>0.98.1-cdh5.1.0</version> 
+		<type>test-jar</type> <exclusions> <exclusion> <groupId>javax.servlet</groupId> 
+		<artifactId>servlet-api</artifactId> </exclusion> <exclusion> <groupId>javax.servlet.jsp</groupId> 
+		<artifactId>jsp-api</artifactId> </exclusion> </exclusions> </dependency> 
+		<dependency> <groupId>javax.servlet</groupId> <artifactId>javax.servlet-api</artifactId> 
+		<version>3.1.0</version> </dependency> <dependency> <groupId>org.apache.hbase</groupId> 
+		<artifactId>hbase-hadoop-compat</artifactId> <version>0.98.1-cdh5.1.0</version> 
+		<type>test-jar</type> </dependency> <dependency> <groupId>org.apache.hbase</groupId> 
+		<artifactId>hbase-hadoop2-compat</artifactId> <version>0.98.1-cdh5.1.0</version> 
+		<type>test-jar</type> </dependency> <dependency> <groupId>org.apache.commons</groupId> 
+		<artifactId>commons-lang3</artifactId> <version>3.3.2</version> </dependency> 
+		</dependencies> -->
 	<repositories>
 		<repository>
 			<id>maven-hadoop</id>
@@ -195,6 +168,7 @@
 			<url>https://repository.cloudera.com/content/repositories/releases/</url>
 		</repository>
 	</repositories>
+
 	<build>
 		<outputDirectory>target/scala/classes</outputDirectory>
 		<testOutputDirectory>target/scala/test-classes</testOutputDirectory>
@@ -205,7 +179,6 @@
 				<version>1.0</version>
 				<configuration>
 					<junitxml>.</junitxml>
-
 				</configuration>
 				<executions>
 					<execution>
@@ -220,7 +193,6 @@
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
 				<executions>
-
 					<execution>
 						<id>compile</id>
 						<goals>
@@ -244,18 +216,10 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>2.2</version>
 				<configuration>
-
 					<shadedArtifactAttached>false</shadedArtifactAttached>
 					<outputFile>target/SparkHBase.jar</outputFile>
 					<artifactSet>
@@ -295,6 +259,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
 
 </project>

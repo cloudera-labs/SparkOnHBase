@@ -1,12 +1,11 @@
 package org.apache.spark.hbase
 
-import org.apache.spark.hbase.HBaseContext;
 import org.apache.spark.streaming.StreamingContext
 import org.scalatest.FunSuite
 import org.apache.spark.SparkContext._
 import org.apache.spark._
 import org.apache.hadoop.hbase.HBaseTestingUtility
-import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.util.Bytes 
 import org.apache.hadoop.hbase.client.HTable
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.client.Get
@@ -17,6 +16,7 @@ import org.apache.hadoop.hbase.client.Increment
 import org.apache.hadoop.hbase.client.Delete
 import org.apache.hadoop.hbase.client.Result
 
+ 
 class HBaseContextSuite extends FunSuite with LocalSparkContext {
 
   var htu: HBaseTestingUtility = null
@@ -26,7 +26,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
 
   override def beforeAll() {
     htu = HBaseTestingUtility.createLocalHTU()
-
+    
     println("1")
     htu.cleanupTestDir()
     println("2")
@@ -57,7 +57,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
 
   test("bulkput to test HBase client") {
     val config = htu.getConfiguration
-    val sc = new SparkContext("local", "test")
+    sc = new SparkContext()
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("1"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo1")))),
       (Bytes.toBytes("2"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("b"), Bytes.toBytes("foo2")))),
@@ -99,11 +99,13 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     assert(Bytes.toString(htable.get(new Get(Bytes.toBytes("5"))).
       getColumnLatest(Bytes.toBytes(columnFamily), Bytes.toBytes("e")).
       getValue()).equals("bar"))
+    
   }
 
   test("bulkIncrement to test HBase client") {
     val config = htu.getConfiguration
-    val sc = new SparkContext("local", "test")
+    
+    sc = new SparkContext()
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("1"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 1L))),
       (Bytes.toBytes("2"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 2L))),
@@ -155,6 +157,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     assert(Bytes.toLong(htable.get(new Get(Bytes.toBytes("5"))).
       getColumnLatest(Bytes.toBytes(columnFamily), Bytes.toBytes("counter")).
       getValue()) == 10L)
+    
   }
 
   test("bulkDelete to test HBase client") {
@@ -172,7 +175,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo3"))
     htable.put(put)
 
-    val sc = new SparkContext("local", "test")
+    sc = new SparkContext()
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("delete1")),
       (Bytes.toBytes("delete3"))))
@@ -190,6 +193,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     assert(Bytes.toString(htable.get(new Get(Bytes.toBytes("delete2"))).
       getColumnLatest(Bytes.toBytes(columnFamily), Bytes.toBytes("a")).
       getValue()).equals("foo2"))
+      
   }
 
   test("bulkGet to test HBase client") {
@@ -207,13 +211,13 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo3"))
     htable.put(put)
 
-    val sc = new SparkContext("local", "test")
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("get1")),
       (Bytes.toBytes("get2")),
       (Bytes.toBytes("get3")),
       (Bytes.toBytes("get4"))))
 
+    sc = new SparkContext()
     val hbaseContext = new HBaseContext(sc, config);
 
     val getRdd = hbaseContext.bulkGet[Array[Byte], String](
@@ -277,7 +281,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes("a"), Bytes.toBytes("foo3"))
     htable.put(put)
     
-    val sc = new SparkContext("local", "test")
+    sc = new SparkContext("local", "test")
     val hbaseContext = new HBaseContext(sc, config)
     
     var scan = new Scan()
