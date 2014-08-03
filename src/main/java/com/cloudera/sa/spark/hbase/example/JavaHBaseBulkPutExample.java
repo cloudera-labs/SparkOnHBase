@@ -13,6 +13,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.hbase.HBaseContext;
+import org.apache.spark.hbase.JavaHBaseContext;
 
 public class JavaHBaseBulkPutExample {
   public static void main(String args[]) {
@@ -42,9 +43,9 @@ public class JavaHBaseBulkPutExample {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
 
-    HBaseContext hbaseContext = new HBaseContext(jsc.sc(), conf);
+    JavaHBaseContext hbaseContext = new JavaHBaseContext(jsc, conf);
 
-    hbaseContext.javaBulkPut(rdd, tableName, new PutFunction(), true);
+    hbaseContext.bulkPut(rdd, tableName, new PutFunction(), true);
   }
 
   public static class PutFunction implements Function<String, Put> {

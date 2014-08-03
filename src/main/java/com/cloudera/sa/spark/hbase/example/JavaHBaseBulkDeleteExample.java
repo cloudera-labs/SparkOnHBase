@@ -12,6 +12,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.hbase.HBaseContext;
+import org.apache.spark.hbase.JavaHBaseContext;
 
 public class JavaHBaseBulkDeleteExample {
   public static void main(String args[]) {
@@ -39,9 +40,9 @@ public class JavaHBaseBulkDeleteExample {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
 
-    HBaseContext hbaseContext = new HBaseContext(jsc.sc(), conf);
+    JavaHBaseContext hbaseContext = new JavaHBaseContext(jsc, conf);
 
-    hbaseContext.javaBulkDelete(rdd, tableName, new DeleteFunction(), 4);
+    hbaseContext.bulkDelete(rdd, tableName, new DeleteFunction(), 4);
 
   }
 

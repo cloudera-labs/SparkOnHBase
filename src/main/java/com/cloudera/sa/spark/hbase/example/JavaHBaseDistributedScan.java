@@ -1,23 +1,17 @@
 package com.cloudera.sa.spark.hbase.example;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Increment;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.hbase.HBaseContext;
+import org.apache.spark.hbase.JavaHBaseContext;
+
+import scala.Tuple2;
+import scala.Tuple3;
 
 public class JavaHBaseDistributedScan {
   public static void main(String args[]) {
@@ -38,13 +32,15 @@ public class JavaHBaseDistributedScan {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
 
-    HBaseContext hbaseContext = new HBaseContext(jsc.sc(), conf);
+    JavaHBaseContext hbaseContext = new JavaHBaseContext(jsc, conf);
 
     Scan scan = new Scan();
     scan.setCaching(100);
     
-    JavaRDD javaRdd = hbaseContext.javaHBaseRDD(tableName, scan);
+    JavaRDD<Tuple2<byte[], List<Tuple3<byte[], byte[], byte[]>>>> javaRdd = hbaseContext.hbaseRDD(tableName, scan);
     
-    List results = javaRdd.collect();
+    List<Tuple2<byte[], List<Tuple3<byte[], byte[], byte[]>>>> results = javaRdd.collect();
+    
+    results.size();
   }
 }

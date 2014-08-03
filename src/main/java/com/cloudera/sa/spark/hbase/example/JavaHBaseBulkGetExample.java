@@ -17,6 +17,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.hbase.HBaseContext;
+import org.apache.spark.hbase.JavaHBaseContext;
 
 public class JavaHBaseBulkGetExample {
   public static void main(String args[]) {
@@ -45,9 +46,9 @@ public class JavaHBaseBulkGetExample {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
 
-    HBaseContext hbaseContext = new HBaseContext(jsc.sc(), conf);
+    JavaHBaseContext hbaseContext = new JavaHBaseContext(jsc, conf);
 
-    hbaseContext.javaBulkGet(tableName, 2, rdd, new GetFunction(),
+    hbaseContext.bulkGet(tableName, 2, rdd, new GetFunction(),
         new ResultFunction());
   }
 
