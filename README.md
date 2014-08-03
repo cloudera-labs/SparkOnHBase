@@ -15,16 +15,16 @@ Current functionality supports the following functions
 * foreachPartition (with HConnection)
 * mapPartition (with HConnection)
 * hbaseRDD (HBaseInputFormat)
-
-##In Progress
 * Java APIs
 * Java Examples
 * Java Unit Tests
 
 ##Near Future
-* More Junit
-* Java Examples
-* Python
+* More unit test
+* More Examples
+* Python APIs
+* Python Examples
+* Python Unit Test
 
 ##Far Future
 
