@@ -10,15 +10,21 @@ Current functionality supports the following functions
 * bulkDelete
 * bulkIncrement
 * bulkGet
+* bulkCheckAndPut
+* bulkCheckAndDelete
 * foreachPartition (with HConnection)
 * mapPartition (with HConnection)
 * hbaseRDD (HBaseInputFormat)
 
-##Near Future
-
-* More Junit
-* Cleaner Pom
+##In Progress
+* Java APIs
 * Java Examples
+* Java Unit Tests
+
+##Near Future
+* More Junit
+* Java Examples
+* Python
 
 ##Far Future
 
