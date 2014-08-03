@@ -40,11 +40,11 @@ object HBaseStreamingBulkPutExample {
       val tableName = args(3);
       val columnFamily = args(4);
       
-      System.out.println("master:" + master)
-      System.out.println("host:" + host)
-      System.out.println("port:" + Integer.parseInt(port))
-      System.out.println("tableName:" + tableName)
-      System.out.println("columnFamily:" + columnFamily)
+      println("master:" + master)
+      println("host:" + host)
+      println("port:" + Integer.parseInt(port))
+      println("tableName:" + tableName)
+      println("columnFamily:" + columnFamily)
       
       val sparkConf = new SparkConf();
       
@@ -55,7 +55,7 @@ object HBaseStreamingBulkPutExample {
       
       val ssc = new StreamingContext(sc, Seconds(1))
       
-      val lines = ssc.socketTextStream(host, Integer.parseInt(port))
+      val lines = ssc.socketTextStream(host, port.toInt)
       
       val conf = HBaseConfiguration.create();
       conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));

@@ -1,49 +1,55 @@
 package com.cloudera.sa.spark.hbase.example;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.hbase.JavaHBaseContext;
+import org.apache.spark.streaming.Duration;
+import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
+import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
-public class JavaHBaseBulkPutExample {
+public class JavaHBaseStreamingBulkPutExample {
   public static void main(String args[]) {
     if (args.length == 0) {
       System.out
-          .println("JavaHBaseBulkPutExample  {master} {tableName} {columnFamily}");
+          .println("JavaHBaseBulkPutExample  {master} {host} {post} {tableName} {columnFamily}");
     }
 
     String master = args[0];
-    String tableName = args[1];
-    String columnFamily = args[2];
+    String host = args[1];
+    String port = args[2];
+    String tableName = args[3];
+    String columnFamily = args[4];
 
+    System.out.println("master:" + master);
+    System.out.println("host:" + host);
+    System.out.println("port:" + Integer.parseInt(port));
+    System.out.println("tableName:" + tableName);
+    System.out.println("columnFamily:" + columnFamily);
+    
+    SparkConf sparkConf = new SparkConf();
+    sparkConf.set("spark.cleaner.ttl", "120000");
+    
     JavaSparkContext jsc = new JavaSparkContext(master,
         "JavaHBaseBulkPutExample");
     jsc.addJar("SparkHBase.jar");
+    
+    JavaStreamingContext jssc = new JavaStreamingContext(jsc, new Duration(1000));
 
-    List<String> list = new ArrayList<String>();
-    list.add("1," + columnFamily + ",a,1");
-    list.add("2," + columnFamily + ",a,2");
-    list.add("3," + columnFamily + ",a,3");
-    list.add("4," + columnFamily + ",a,4");
-    list.add("5," + columnFamily + ",a,5");
-
-    JavaRDD<String> rdd = jsc.parallelize(list);
-
+    JavaReceiverInputDStream<String> javaDstream = jssc.socketTextStream(host, Integer.parseInt(port));
+    
     Configuration conf = HBaseConfiguration.create();
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
 
     JavaHBaseContext hbaseContext = new JavaHBaseContext(jsc, conf);
 
-    hbaseContext.bulkPut(rdd, tableName, new PutFunction(), true);
+    hbaseContext.streamBulkPut(javaDstream, tableName, new PutFunction(), true);
   }
 
   public static class PutFunction implements Function<String, Put> {
