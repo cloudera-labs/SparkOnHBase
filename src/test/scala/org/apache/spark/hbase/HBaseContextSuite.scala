@@ -216,7 +216,7 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
       (Bytes.toBytes("get4"))))
     val hbaseContext = new HBaseContext(sc, config);
 
-    val getRdd = hbaseContext.bulkGet[Array[Byte], String](
+    val getRdd = hbaseContext.bulkGet[Array[Byte], Object](
       tableName,
       2,
       rdd,
@@ -241,13 +241,16 @@ class HBaseContextSuite extends FunSuite with LocalSparkContext {
               B.append("(" + Bytes.toString(kv.getQualifier()) + "," + Bytes.toString(kv.getValue()) + ")")
             }
           }
-          B.toString
+          "" + B.toString
         } else {
-          null
+          ""
         }
       })
 
+      
     val getArray = getRdd.collect
+    
+    getArray.foreach(f => println(f));
 
     assert(getArray.length == 4)
     assert(getArray.contains("get1:(a,foo1)"))
