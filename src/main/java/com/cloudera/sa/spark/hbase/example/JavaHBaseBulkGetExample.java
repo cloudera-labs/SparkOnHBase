@@ -22,15 +22,14 @@ public class JavaHBaseBulkGetExample {
   public static void main(String args[]) {
     if (args.length == 0) {
       System.out
-          .println("JavaHBaseBulkPutExample  {master} {tableName} {columnFamily}");
+          .println("JavaHBaseBulkGetExample  {master} {tableName}");
     }
 
     String master = args[0];
     String tableName = args[1];
-    String columnFamily = args[2];
 
     JavaSparkContext jsc = new JavaSparkContext(master,
-        "JavaHBaseBulkPutExample");
+        "JavaHBaseBulkGetExample");
     jsc.addJar("SparkHBase.jar");
 
     List<byte[]> list = new ArrayList<byte[]>();
