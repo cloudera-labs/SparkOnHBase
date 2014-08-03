@@ -65,20 +65,20 @@ object HBaseBulkGetExample {
       (result: Result) => {
 
         val it = result.list().iterator()
-        val B = new StringBuilder
+        val b = new StringBuilder
 
-        B.append(Bytes.toString(result.getRow()) + ":")
+        b.append(Bytes.toString(result.getRow()) + ":")
 
         while (it.hasNext()) {
           val kv = it.next()
           val q = Bytes.toString(kv.getQualifier())
           if (q.equals("counter")) {
-            B.append("(" + Bytes.toString(kv.getQualifier()) + "," + Bytes.toLong(kv.getValue()) + ")")
+            b.append("(" + Bytes.toString(kv.getQualifier()) + "," + Bytes.toLong(kv.getValue()) + ")")
           } else {
-            B.append("(" + Bytes.toString(kv.getQualifier()) + "," + Bytes.toString(kv.getValue()) + ")")  
+            b.append("(" + Bytes.toString(kv.getQualifier()) + "," + Bytes.toString(kv.getValue()) + ")")  
           }
         }
-        B.toString
+        b.toString
       })
       
     

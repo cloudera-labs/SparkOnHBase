@@ -27,7 +27,7 @@ import org.apache.hadoop.hbase.client.Delete
 object HBaseBulkDeleteExample {
   def main(args: Array[String]) {
 	  if (args.length == 0) {
-    		System.out.println("HBaseBulkDeletesExample {master} {tableName} {columnFamily}");
+    		println("HBaseBulkDeletesExample {master} {tableName} ");
     		return;
       }
     	
