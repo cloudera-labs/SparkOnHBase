@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.client.Put
 import org.apache.spark.hbase.HBaseContext
+import org.apache.spark.SparkConf
 
 object HBaseBulkPutExample {
   def main(args: Array[String]) {
@@ -35,10 +36,8 @@ object HBaseBulkPutExample {
       val tableName = args(1);
       val columnFamily = args(2);
     	
-      val sc = new SparkContext(master, "HBaseBulkPutExample");
-      sc.addJar("SparkHBase.jar")
-      
-      
+      val sparkConf = new SparkConf().setAppName("HBaseWrite")
+      val sc = new SparkContext(sparkConf)
       
       //[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])]
       val rdd = sc.parallelize(Array(

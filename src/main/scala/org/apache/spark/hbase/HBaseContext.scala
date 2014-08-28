@@ -74,6 +74,7 @@ import org.apache.spark.streaming.api.java.JavaDStream
 import org.apache.hadoop.security.Credentials
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
+import org.apache.hadoop.hbase.protobuf.RequestConverter
 
 
 /**
@@ -98,6 +99,7 @@ class HBaseContext(@transient sc: SparkContext,
   TableMapReduceUtil.initCredentials(job)
   val credentialsConf = sc.broadcast(new SerializableWritable(job.getCredentials()))
 
+  
   /**
    * A simple enrichment of the traditional Spark RDD foreachPartition.
    * This function differs from the original in that it offers the
