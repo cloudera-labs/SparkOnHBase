@@ -38,6 +38,8 @@ object HBaseBulkPutExample {
       val sc = new SparkContext(master, "HBaseBulkPutExample");
       sc.addJar("SparkHBase.jar")
       
+      
+      
       //[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])]
       val rdd = sc.parallelize(Array(
             (Bytes.toBytes("1"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("1"), Bytes.toBytes("1")))),

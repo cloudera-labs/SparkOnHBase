@@ -71,6 +71,9 @@ import org.apache.spark.api.java.JavaSparkContext.fakeClassTag
 import org.apache.spark.api.java.function.FlatMapFunction
 import scala.collection.JavaConversions._
 import org.apache.spark.streaming.api.java.JavaDStream
+import org.apache.hadoop.security.Credentials
+import org.apache.hadoop.security.UserGroupInformation
+import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 
 
 /**
@@ -90,6 +93,10 @@ import org.apache.spark.streaming.api.java.JavaDStream
 class HBaseContext(@transient sc: SparkContext,
   @transient config: Configuration) extends Serializable {
   val broadcastedConf = sc.broadcast(new SerializableWritable(config))
+  
+  @transient val job = new Job(config)
+  TableMapReduceUtil.initCredentials(job)
+  val credentialsConf = sc.broadcast(new SerializableWritable(job.getCredentials()))
 
   /**
    * A simple enrichment of the traditional Spark RDD foreachPartition.
@@ -107,7 +114,7 @@ class HBaseContext(@transient sc: SparkContext,
   def foreachPartition[T](rdd: RDD[T],
     f: (Iterator[T], HConnection) => Unit) = {
     rdd.foreachPartition(
-      it => hbaseForeachPartition(broadcastedConf, it, f))
+      it => hbaseForeachPartition(broadcastedConf, credentialsConf, it, f))
   }
    
   /**
@@ -151,7 +158,8 @@ class HBaseContext(@transient sc: SparkContext,
   def mapPartition[T, R: ClassTag](rdd: RDD[T],
     mp: (Iterator[T], HConnection) => Iterator[R]): RDD[R] = {
 
-    rdd.mapPartitions[R](it => hbaseMapPartition[T, R](broadcastedConf,
+    rdd.mapPartitions[R](it => hbaseMapPartition[T, R](broadcastedConf, 
+      credentialsConf,
       it,
       mp), true)
   }
@@ -179,7 +187,9 @@ class HBaseContext(@transient sc: SparkContext,
   def streamMap[T, U: ClassTag](dstream: DStream[T],
     mp: (Iterator[T], HConnection) => Iterator[U]): DStream[U] = {
 
-    dstream.mapPartitions(it => hbaseMapPartition[T, U](broadcastedConf,
+    dstream.mapPartitions(it => hbaseMapPartition[T, U](
+      broadcastedConf,
+      credentialsConf,
       it,
       mp), true)
   }
@@ -204,6 +214,7 @@ class HBaseContext(@transient sc: SparkContext,
     rdd.foreachPartition(
       it => hbaseForeachPartition[T](
         broadcastedConf,
+        credentialsConf,
         it,
         (iterator, hConnection) => {
           val htable = hConnection.getTable(tableName)
@@ -256,6 +267,7 @@ class HBaseContext(@transient sc: SparkContext,
     rdd.foreachPartition(
       it => hbaseForeachPartition[T](
         broadcastedConf,
+        credentialsConf,
         it,
         (iterator, hConnection) => {
           val htable = hConnection.getTable(tableName)
@@ -346,6 +358,7 @@ class HBaseContext(@transient sc: SparkContext,
     rdd.foreachPartition(
       it => hbaseForeachPartition[T](
         broadcastedConf,
+        credentialsConf,
         it,
         (iterator, hConnection) => {
           val htable = hConnection.getTable(tableName)
@@ -434,6 +447,7 @@ class HBaseContext(@transient sc: SparkContext,
     rdd.foreachPartition(
       it => hbaseForeachPartition[T](
         broadcastedConf,
+        credentialsConf,
         it,
         (iterator, hConnection) => {
           val htable = hConnection.getTable(tableName)
@@ -494,7 +508,11 @@ class HBaseContext(@transient sc: SparkContext,
       convertResult)
 
     rdd.mapPartitions[U](it => 
-      hbaseMapPartition[T, U](broadcastedConf,it,getMapPartition.run), true)(fakeClassTag[U])
+      hbaseMapPartition[T, U](
+          broadcastedConf,
+          credentialsConf,
+          it,
+          getMapPartition.run), true)(fakeClassTag[U])
   }
   
   /**
@@ -524,7 +542,9 @@ class HBaseContext(@transient sc: SparkContext,
       makeGet,
       convertResult)
 
-    dstream.mapPartitions[U](it => hbaseMapPartition[T, U](broadcastedConf,
+    dstream.mapPartitions[U](it => hbaseMapPartition[T, U](
+      broadcastedConf,
+      credentialsConf,
       it,
       getMapPartition.run), true)
   }
@@ -561,7 +581,8 @@ class HBaseContext(@transient sc: SparkContext,
    *  @return New RDD with results from scan
    *
    */
-  def hbaseRDD(tableName: String, scans: Scan): RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
+  def hbaseRDD(tableName: String, scans: Scan): 
+    RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
     hbaseRDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](
       tableName,
       scans,
@@ -583,38 +604,47 @@ class HBaseContext(@transient sc: SparkContext,
    *  Under lining wrapper all foreach functions in HBaseContext
    *
    */
-  private def hbaseForeachPartition[T](configBroadcast: Broadcast[SerializableWritable[Configuration]],
+  private def hbaseForeachPartition[T](
+    configBroadcast: Broadcast[SerializableWritable[Configuration]],
+    credentialBroadcast: Broadcast[SerializableWritable[Credentials]],
     it: Iterator[T],
     f: (Iterator[T], HConnection) => Unit) = {
 
     val config = configBroadcast.value.value
-
-    val hConnection = HConnectionStaticCache.getHConnection(config)
-    try {
-      f(it, hConnection)
-    } finally {
-      HConnectionStaticCache.finishWithHConnection(config, hConnection)
-    }
+    val creds = credentialBroadcast.value.value
+    
+    val ugi = UserGroupInformation.getCurrentUser();
+    ugi.addCredentials(creds)
+    // specify that this is a proxy user 
+    ugi.setAuthenticationMethod(AuthenticationMethod.PROXY) 
+    
+    val hConnection = HConnectionManager.createConnection(config)
+    f(it, hConnection)
   }
 
   /**
    *  Under lining wrapper all mapPartition functions in HBaseContext
    *
    */
-  private def hbaseMapPartition[K, U](configBroadcast: Broadcast[SerializableWritable[Configuration]],
+  private def hbaseMapPartition[K, U](
+    configBroadcast: Broadcast[SerializableWritable[Configuration]],
+    credentialBroadcast: Broadcast[SerializableWritable[Credentials]],
     it: Iterator[K],
     mp: (Iterator[K], HConnection) => Iterator[U]): Iterator[U] = {
 
     val config = configBroadcast.value.value
+    val creds = credentialBroadcast.value.value
+    
+    val ugi = UserGroupInformation.getCurrentUser();
+    ugi.addCredentials(creds)
+    // specify that this is a proxy user 
+    ugi.setAuthenticationMethod(AuthenticationMethod.PROXY) 
 
-    val hConnection = HConnectionStaticCache.getHConnection(config)
+    val hConnection = HConnectionManager.createConnection(config)
 
-    try {
-      val res = mp(it, hConnection)
-      res
-    } finally {
-      HConnectionStaticCache.finishWithHConnection(config, hConnection)
-    }
+    val res = mp(it, hConnection)
+    res
+
   }
   
   /**
