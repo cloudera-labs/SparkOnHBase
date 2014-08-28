@@ -38,13 +38,11 @@ import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.client.Increment
 import org.apache.hadoop.hbase.client.Delete
 import org.apache.spark.SparkContext
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapreduce.Job
-import org.apache.hadoop.hbase.mapreduce.TableMapper
-import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
+import org.apache.hadoop.hbase.mapred.IdentityTableMap
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.Base64
 import org.apache.hadoop.hbase.mapreduce.MutationSerialization
@@ -75,6 +73,9 @@ import org.apache.hadoop.security.Credentials
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 import org.apache.hadoop.hbase.protobuf.RequestConverter
+import org.apache.hadoop.mapred.JobConf
+import org.apache.hadoop.hbase.mapreduce.TableInputFormat
+import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
 
 
 /**
@@ -93,10 +94,11 @@ import org.apache.hadoop.hbase.protobuf.RequestConverter
  */
 class HBaseContext(@transient sc: SparkContext,
   @transient config: Configuration) extends Serializable {
-  val broadcastedConf = sc.broadcast(new SerializableWritable(config))
+  
   
   @transient val job = new Job(config)
   TableMapReduceUtil.initCredentials(job)
+  val broadcastedConf = sc.broadcast(new SerializableWritable(config))
   val credentialsConf = sc.broadcast(new SerializableWritable(job.getCredentials()))
 
   
@@ -565,6 +567,7 @@ class HBaseContext(@transient sc: SparkContext,
 
     var job: Job = new Job(broadcastedConf.value.value)
 
+    TableMapReduceUtil.initCredentials(job)
     TableMapReduceUtil.initTableMapperJob(tableName, scan, classOf[IdentityTableMapper], null, null, job)
 
     sc.newAPIHadoopRDD(job.getConfiguration(),
@@ -585,6 +588,7 @@ class HBaseContext(@transient sc: SparkContext,
    */
   def hbaseRDD(tableName: String, scans: Scan): 
     RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
+    
     hbaseRDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](
       tableName,
       scans,

@@ -51,8 +51,11 @@ object HBaseDistributedScanExample {
     scan.setCaching(100)
     
     var getRdd = hbaseContext.hbaseRDD(tableName, scan)
-    
+    println(" --- abc")
+    getRdd.foreach(v => println(Bytes.toString(v._1)))
+    println(" --- def")
     getRdd.collect.foreach(v => println(Bytes.toString(v._1)))
+    println(" --- qwe")
     
   }
 }
