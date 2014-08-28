@@ -23,20 +23,21 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.client.Put
 import org.apache.spark.hbase.HBaseContext
+import org.apache.spark.SparkConf
 
 object HBaseBulkPutTimestampExample {
   def main(args: Array[String]) {
     if (args.length == 0) {
-      System.out.println("HBaseBulkPutTimestampExample {master} {tableName} {columnFamily}");
+      System.out.println("HBaseBulkPutTimestampExample {tableName} {columnFamily}");
       return ;
     }
 
-    val master = args(0);
-    val tableName = args(1);
-    val columnFamily = args(2);
+    val tableName = args(0);
+    val columnFamily = args(1);
 
-    val sc = new SparkContext(master, "HBaseBulkPutTimestampExample");
-    sc.addJar("SparkHBase.jar")
+    val sparkConf = new SparkConf().setAppName("HBaseBulkPutTimestampExample " + tableName + " " + columnFamily)
+    val sc = new SparkContext(sparkConf)
+      
 
     val rdd = sc.parallelize(Array(
       (Bytes.toBytes("6"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("1"), Bytes.toBytes("1")))),

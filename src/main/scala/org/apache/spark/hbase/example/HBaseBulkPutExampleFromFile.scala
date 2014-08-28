@@ -26,21 +26,22 @@ import org.apache.spark.hbase.HBaseContext
 import org.apache.hadoop.mapred.TextInputFormat
 import org.apache.hadoop.io.LongWritable
 import org.apache.hadoop.io.Text
+import org.apache.spark.SparkConf
 
 object HBaseBulkPutExampleFromFile {
   def main(args: Array[String]) {
 	  if (args.length == 0) {
-    		System.out.println("HBaseBulkPutExample {master} {tableName} {columnFamily}");
+    		System.out.println("HBaseBulkPutExampleFromFile {tableName} {columnFamily} {inputFile}");
     		return;
       }
     	
-      val master = args(0)
-      val tableName = args(1)
-      val columnFamily = args(2)
-      val inputFile = args(3)
+      val tableName = args(0)
+      val columnFamily = args(1)
+      val inputFile = args(2)
     	
-      val sc = new SparkContext(master, "HBaseBulkPutExample");
-      sc.addJar("SparkHBase.jar")
+      val sparkConf = new SparkConf().setAppName("HBaseBulkPutExampleFromFile " + 
+          tableName + " " + columnFamily + " " + inputFile)
+      val sc = new SparkContext(sparkConf)
       
       var rdd = sc.hadoopFile(
           inputFile, 

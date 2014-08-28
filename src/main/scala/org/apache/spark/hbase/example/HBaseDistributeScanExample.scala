@@ -26,20 +26,20 @@ import org.apache.hadoop.hbase.client.Result
 import org.apache.spark.hbase.HBaseContext
 import org.apache.hadoop.hbase.client.Scan
 import java.util.ArrayList
+import org.apache.spark.SparkConf
 
 
 object HBaseDistributedScanExample {
   def main(args: Array[String]) {
     if (args.length == 0) {
-      System.out.println("GenerateGraphs {master} {tableName}")
+      System.out.println("GenerateGraphs {tableName}")
       return ;
     }
 
-    val master = args(0);
-    val tableName = args(1);
+    val tableName = args(0);
 
-    val sc = new SparkContext(master, "HBaseDistributedScanExample")
-    sc.addJar("SparkHBase.jar")
+    val sparkConf = new SparkConf().setAppName("HBaseDistributedScanExample " + tableName )
+    val sc = new SparkContext(sparkConf)
 
     val conf = HBaseConfiguration.create()
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"))

@@ -23,20 +23,20 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.client.Increment
 import org.apache.spark.hbase.HBaseContext
+import org.apache.spark.SparkConf
 
 object HBaseBulkIncrementExample {
   def main(args: Array[String]) {
 	  if (args.length == 0) {
-    		System.out.println("GenerateGraphs {master} {tableName} {columnFamily}");
+    		System.out.println("HBaseBulkIncrementExample {tableName} {columnFamily}");
     		return;
       }
     	
-      val master = args(0);
-      val tableName = args(1);
-      val columnFamily = args(2);
+      val tableName = args(0);
+      val columnFamily = args(1);
     	
-      val sc = new SparkContext(master, "HBaseBulkIncrementsExample");
-      sc.addJar("SparkHBase.jar")
+      val sparkConf = new SparkConf().setAppName("HBaseBulkIncrementExample " + tableName + " " + columnFamily)
+      val sc = new SparkContext(sparkConf)
       
       //[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])]
       val rdd = sc.parallelize(Array(

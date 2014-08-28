@@ -30,28 +30,23 @@ import org.apache.spark.SparkConf
 object HBaseStreamingBulkPutExample {
   def main(args: Array[String]) {
     if (args.length == 0) {
-        System.out.println("HBaseStreamingBulkPutExample {master} {host} {port} {tableName} {columnFamily}");
+        System.out.println("HBaseStreamingBulkPutExample {host} {port} {tableName} {columnFamily}");
         return;
       }
       
-      val master = args(0);
-      val host = args(1);
-      val port = args(2);
-      val tableName = args(3);
-      val columnFamily = args(4);
+      val host = args(0);
+      val port = args(1);
+      val tableName = args(2);
+      val columnFamily = args(3);
       
-      println("master:" + master)
       println("host:" + host)
       println("port:" + Integer.parseInt(port))
       println("tableName:" + tableName)
       println("columnFamily:" + columnFamily)
       
-      val sparkConf = new SparkConf();
-      
+      val sparkConf = new SparkConf().setAppName("HBaseBulkPutTimestampExample " + tableName + " " + columnFamily)
       sparkConf.set("spark.cleaner.ttl", "120000");
-      
-      val sc = new SparkContext(master, "HBaseStreamingBulkPutExample", sparkConf)
-      sc.addJar("SparkHBase.jar")
+      val sc = new SparkContext(sparkConf)
       
       val ssc = new StreamingContext(sc, Seconds(1))
       

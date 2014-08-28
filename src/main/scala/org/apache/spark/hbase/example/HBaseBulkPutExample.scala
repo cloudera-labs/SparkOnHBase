@@ -28,15 +28,14 @@ import org.apache.spark.SparkConf
 object HBaseBulkPutExample {
   def main(args: Array[String]) {
 	  if (args.length == 0) {
-    		System.out.println("HBaseBulkPutExample {master} {tableName} {columnFamily}");
+    		System.out.println("HBaseBulkPutExample {tableName} {columnFamily}");
     		return;
       }
     	
-      val master = args(0);
-      val tableName = args(1);
-      val columnFamily = args(2);
+      val tableName = args(0);
+      val columnFamily = args(1);
     	
-      val sparkConf = new SparkConf().setAppName("HBaseWrite")
+      val sparkConf = new SparkConf().setAppName("HBaseBulkPutExample " + tableName + " " + columnFamily)
       val sc = new SparkContext(sparkConf)
       
       //[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])]

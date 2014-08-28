@@ -23,19 +23,19 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.hbase.HBaseContext
 import org.apache.hadoop.hbase.client.Delete
+import org.apache.spark.SparkConf
 
 object HBaseBulkDeleteExample {
   def main(args: Array[String]) {
 	  if (args.length == 0) {
-    		println("HBaseBulkDeletesExample {master} {tableName} ");
+    		println("HBaseBulkDeletesExample {tableName} ");
     		return;
       }
     	
-      val master = args(0);
-      val tableName = args(1);
+      val tableName = args(0);
     	
-      val sc = new SparkContext(master, "HBaseBulkDeletesExample");
-      sc.addJar("SparkHBase.jar")
+      val sparkConf = new SparkConf().setAppName("HBaseBulkDeleteExample " + tableName)
+      val sc = new SparkContext(sparkConf)
       
       //[Array[Byte]]
       val rdd = sc.parallelize(Array(

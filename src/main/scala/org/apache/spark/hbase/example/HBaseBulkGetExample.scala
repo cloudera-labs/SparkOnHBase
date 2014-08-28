@@ -24,19 +24,20 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.client.Get
 import org.apache.hadoop.hbase.client.Result
 import org.apache.spark.hbase.HBaseContext
+import org.apache.spark.SparkConf
 
 object HBaseBulkGetExample {
   def main(args: Array[String]) {
     if (args.length == 0) {
-      System.out.println("GenerateGraphs {master} {tableName}");
+      System.out.println("HBaseBulkGetExample {tableName}");
       return ;
     }
 
-    val master = args(0);
-    val tableName = args(1);
+    val tableName = args(0);
 
-    val sc = new SparkContext(master, "HBaseBulkGetExample");
-    sc.addJar("SparkHBase.jar")
+    val sparkConf = new SparkConf().setAppName("HBaseBulkGetExample " + tableName)
+    val sc = new SparkContext(sparkConf)
+      
 
     //[(Array[Byte])]
     val rdd = sc.parallelize(Array(
