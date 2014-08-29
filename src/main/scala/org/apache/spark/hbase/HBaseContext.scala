@@ -76,6 +76,9 @@ import org.apache.hadoop.hbase.protobuf.RequestConverter
 import org.apache.hadoop.mapred.JobConf
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
+import org.apache.spark.hbase.HBaseScanRDD
+import org.apache.spark.hbase.HBaseScanRDD
+import org.apache.spark.hbase.HBaseScanRDD
 
 
 /**
@@ -603,6 +606,14 @@ class HBaseContext(@transient sc: SparkContext,
 
         (r._1.copyBytes(), list)
       })
+  }
+  
+  def hbaseScanRDD(tableName: String, scan: Scan): 
+    RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
+     
+    new HBaseScanRDD(sc, tableName, scan,
+     broadcastedConf,
+     credentialsConf)
   }
   
 
