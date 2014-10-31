@@ -41,7 +41,17 @@ class JavaHBaseContext(@transient jsc: JavaSparkContext,
     hbc.foreachPartition(javaRdd.rdd, 
         (iterator:Iterator[T], hConnection) => 
           { f.call((iterator, hConnection))})
-  }  
+  } 
+  
+  def foreach[T](javaRdd: JavaRDD[T],
+    f: VoidFunction[(T, HConnection)] ) = {
+    
+    hbc.foreachPartition(javaRdd.rdd, 
+        (iterator:Iterator[T], hConnection) =>
+          iterator.foreach(a => f.call((a, hConnection))))
+          
+          //{ f.call((iterator, hConnection))})
+  }
   
   /**
    * A simple enrichment of the traditional Spark Streaming dStream foreach

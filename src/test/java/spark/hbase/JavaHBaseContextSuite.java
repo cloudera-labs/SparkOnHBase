@@ -93,7 +93,7 @@ public class JavaHBaseContextSuite implements Serializable {
   }
 
   @Test
-  public void testBulkIncrement() {
+  public void testJavaBulkIncrement() {
     
     List<String> list = new ArrayList<String>();
     list.add("1," + columnFamily + ",counter,1");
@@ -109,7 +109,11 @@ public class JavaHBaseContextSuite implements Serializable {
     JavaHBaseContext hbaseContext = new JavaHBaseContext(jsc, conf);
 
     hbaseContext.bulkIncrement(rdd, tableName, new IncrementFunction(), 4);
+    
+    throw new RuntimeException();
   }
+  
+  
 
   @Test
   public void testBulkPut() {
