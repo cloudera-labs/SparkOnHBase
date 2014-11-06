@@ -48,16 +48,34 @@ public class TestJavaLocalMainExample {
 
     JavaRDD<byte[]> rdd = jsc.parallelize(list);
  
-    
+
+    hbaseContext.foreachPartition(rdd,  new VoidFunction<Tuple2<Iterator<byte[]>, HConnection>>() {
+
+
+      public void call(Tuple2<Iterator<byte[]>, HConnection> t)
+              throws Exception {
+        HTableInterface table1 = t._2().getTable(Bytes.toBytes("Foo"));
+
+        Iterator<byte[]> it = t._1();
+
+        while (it.hasNext()) {
+          byte[] b = it.next();
+          Result r = table1.get(new Get(b));
+          if (r.getExists()) {
+            table1.put(new Put(b));
+          }
+        }
+      }
+    });
+
     //This is me
     hbaseContext.foreach(rdd, new VoidFunction<Tuple2<byte[], HConnection>>() {
 
-
       public void call(Tuple2<byte[], HConnection> t)
           throws Exception {
-        HTableInterface table1 = t._2.getTable(Bytes.toBytes("Foo"));
+        HTableInterface table1 = t._2().getTable(Bytes.toBytes("Foo"));
         
-        byte[] b = t._1;
+        byte[] b = t._1();
         Result r = table1.get(new Get(b));
         if (r.getExists()) {
           table1.put(new Put(b));

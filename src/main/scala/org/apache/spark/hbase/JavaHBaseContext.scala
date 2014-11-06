@@ -36,7 +36,7 @@ class JavaHBaseContext(@transient jsc: JavaSparkContext,
    *                with HBase
    */
   def foreachPartition[T](javaRdd: JavaRDD[T],
-    f: VoidFunction[(Iterator[T], HConnection)] ) = {
+    f: VoidFunction[(java.util.Iterator[T], HConnection)] ) = {
     
     hbc.foreachPartition(javaRdd.rdd, 
         (iterator:Iterator[T], hConnection) => 
