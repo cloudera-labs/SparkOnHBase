@@ -637,6 +637,7 @@ class HBaseContext(@transient sc: SparkContext,
     
     val hConnection = HConnectionManager.createConnection(config)
     f(it, hConnection)
+    hConnection.close()
   }
 
   /**
@@ -660,6 +661,7 @@ class HBaseContext(@transient sc: SparkContext,
     val hConnection = HConnectionManager.createConnection(config)
 
     val res = mp(it, hConnection)
+    hConnection.close()
     res
 
   }
