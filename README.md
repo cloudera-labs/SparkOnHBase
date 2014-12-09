@@ -40,12 +40,12 @@ just mvn clean package
 ##CDH setup
 Testing was done on CDH 5.0.2
 
-Just put hbase-protocol-0.96.1.1-cdh5.0.2.jar in /opt/cloudera/parcels/CDH-5.0.2-1.cdh5.0.2.p0.13/lib/spark/assembly/lib/ and bunced
+Just put hbase-protocol-*.jar in /opt/cloudera/parcels/CDH/lib/spark/assembly/lib/ and bunced
 
-/opt/cloudera/parcels/CDH-5.1.0-1.cdh5.1.0.p0.53/lib/spark/assembly/lib
+/opt/cloudera/parcels/CDH/lib/spark/assembly/lib
 
 ##Examples
-SparkOnHBase comes with a number of examples.  Here is the Cli commands to try them out.  These work with a table named 't1' and columnfmaily 'c'
+SparkOnHBase comes with a number of examples.  Here is the CLI commands to try them out.  These work with a table named 't1' and columnfmaily 'c'
 
 create 't1', 'c'
 
