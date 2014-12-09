@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.cloudera.sa</groupId>
-	<artifactId>spark.hbase</artifactId>
+	<groupId>com.cloudera</groupId>
+	<artifactId>spark-hbase</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>spark.hbase</name>
+	<name>Spark HBase Integration</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
