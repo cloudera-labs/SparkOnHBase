@@ -35,7 +35,7 @@ Current functionality supports the following functions
 
 
 ##Build
-just mvn clean package
+mvn clean package
 
 ##CDH setup
 Testing was done on CDH 5.0.2
