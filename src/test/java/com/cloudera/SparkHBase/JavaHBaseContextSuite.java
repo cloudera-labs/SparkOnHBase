@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.cloudera.sa.spark.hbase.example.JavaHBaseBulkDeleteExample.DeleteFunction;
-import com.cloudera.sa.spark.hbase.example.JavaHBaseBulkGetExample.GetFunction;
-import com.cloudera.sa.spark.hbase.example.JavaHBaseBulkGetExample.ResultFunction;
-import com.cloudera.sa.spark.hbase.example.JavaHBaseBulkIncrementExample.IncrementFunction;
-import com.cloudera.sa.spark.hbase.example.JavaHBaseBulkPutExample.PutFunction;
+import com.cloudera.SparkHBase.example.JavaHBaseBulkDeleteExample.DeleteFunction;
+import com.cloudera.SparkHBase.example.JavaHBaseBulkGetExample.GetFunction;
+import com.cloudera.SparkHBase.example.JavaHBaseBulkGetExample.ResultFunction;
+import com.cloudera.SparkHBase.example.JavaHBaseBulkIncrementExample.IncrementFunction;
+import com.cloudera.SparkHBase.example.JavaHBaseBulkPutExample.PutFunction;
 import com.google.common.collect.Lists;
 
 import java.util.*;
@@ -25,7 +25,7 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.hbase.JavaHBaseContext;
+import com.cloudera.SparkHBase.JavaHBaseContext;
 import org.junit.*;
 
 import scala.Tuple2;

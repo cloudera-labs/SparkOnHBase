@@ -17,6 +17,7 @@ import org.apache.hadoop.hbase.client.Get
 import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import scala.reflect.ClassTag
 
 class JavaHBaseContext(@transient jsc: JavaSparkContext,
   @transient config: Configuration) extends Serializable {
@@ -395,5 +396,21 @@ class JavaHBaseContext(@transient jsc: JavaSparkContext,
   def hbaseRDD(tableName: String, 
       scans: Scan): JavaRDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
     JavaRDD.fromRDD(hbc.hbaseRDD(tableName, scans))
-  } 
+  }
+
+  /**
+   * Produces a ClassTag[T], which is actually just a casted ClassTag[AnyRef].
+   *
+   * This method is used to keep ClassTags out of the external Java API, as the Java compiler
+   * cannot produce them automatically. While this ClassTag-faking does please the compiler,
+   * it can cause problems at runtime if the Scala API relies on ClassTags for correctness.
+   *
+   * Often, though, a ClassTag[AnyRef] will not lead to incorrect behavior, just worse performance
+   * or security issues. For instance, an Array[AnyRef] can hold any type T, but may lose primitive
+   * specialization.
+   */
+  private[SparkHBase]
+  def fakeClassTag[T]: ClassTag[T] = ClassTag.AnyRef.asInstanceOf[ClassTag[T]]
+
+
 }

@@ -573,13 +573,13 @@ class HBaseContext(@transient sc: SparkContext,
       })
   }
   
-  def hbaseScanRDD(tableName: String, scan: Scan): 
-    RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
-     
-    new HBaseScanRDD(sc, tableName, scan,
-     broadcastedConf,
-     credentialsConf)
-  }
+//def hbaseScanRDD(tableName: String, scan: Scan):
+//  RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
+//
+//    new HBaseScanRDD(sc, tableName, scan,
+//     broadcastedConf,
+//     credentialsConf)
+//  }
   
 
   /**
@@ -663,4 +663,17 @@ class HBaseContext(@transient sc: SparkContext,
       res.iterator
     }
   }
+  /**
+   * Produces a ClassTag[T], which is actually just a casted ClassTag[AnyRef].
+   *
+   * This method is used to keep ClassTags out of the external Java API, as the Java compiler
+   * cannot produce them automatically. While this ClassTag-faking does please the compiler,
+   * it can cause problems at runtime if the Scala API relies on ClassTags for correctness.
+   *
+   * Often, though, a ClassTag[AnyRef] will not lead to incorrect behavior, just worse performance
+   * or security issues. For instance, an Array[AnyRef] can hold any type T, but may lose primitive
+   * specialization.
+   */
+  private[SparkHBase]
+  def fakeClassTag[T]: ClassTag[T] = ClassTag.AnyRef.asInstanceOf[ClassTag[T]]
 }
