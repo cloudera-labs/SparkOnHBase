@@ -26,10 +26,10 @@ import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.client.Scan
 import java.util.ArrayList
 import org.apache.spark.SparkConf
-import com.cloudera.SparkHBase.HBaseContext
+import com.cloudera.spark.hbase.HBaseContext
 
 
-object HBaseDistributedScanExample {
+object HBaseScanRDDExample {
   def main(args: Array[String]) {
     if (args.length == 0) {
       System.out.println("GenerateGraphs {tableName}")
@@ -50,7 +50,7 @@ object HBaseDistributedScanExample {
     var scan = new Scan()
     scan.setCaching(100)
     
-    var getRdd = hbaseContext.hbaseRDD(tableName, scan)
+    var getRdd = hbaseContext.hbaseScanRDD(tableName, scan)
     println(" --- abc")
     getRdd.foreach(v => println(Bytes.toString(v._1)))
     println(" --- def")

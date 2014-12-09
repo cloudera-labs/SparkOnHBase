@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.SparkHBase
+package com.cloudera.spark.hbase
 
 //import _root_.io.netty.util.internal.logging.{Slf4JLoggerFactory, InternalLoggerFactory}
 import org.scalatest.BeforeAndAfterAll
@@ -51,7 +51,7 @@ object LocalSparkContext {
       sc.stop()
     }
     // To avoid Akka rebinding to the same port, since it doesn't unbind immediately on shutdown
-    System.clearProperty("SparkHBase.driver.port")
+    System.clearProperty("spark.driver.port")
   }
 
   /** Runs `f` by passing in `sc` and ensures that `sc` is stopped. */

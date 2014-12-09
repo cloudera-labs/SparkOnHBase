@@ -21,51 +21,40 @@ import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase.client.Put
-import org.apache.hadoop.mapred.TextInputFormat
-import org.apache.hadoop.io.LongWritable
-import org.apache.hadoop.io.Text
+import org.apache.hadoop.hbase.client.Delete
 import org.apache.spark.SparkConf
-import com.cloudera.SparkHBase.HBaseContext
+import com.cloudera.spark.hbase.HBaseContext
 
-object HBaseBulkPutExampleFromFile {
+object HBaseBulkDeleteExample {
   def main(args: Array[String]) {
 	  if (args.length == 0) {
-    		System.out.println("HBaseBulkPutExampleFromFile {tableName} {columnFamily} {inputFile}");
+    		println("HBaseBulkDeletesExample {tableName} ");
     		return;
       }
     	
-      val tableName = args(0)
-      val columnFamily = args(1)
-      val inputFile = args(2)
+      val tableName = args(0);
     	
-      val sparkConf = new SparkConf().setAppName("HBaseBulkPutExampleFromFile " + 
-          tableName + " " + columnFamily + " " + inputFile)
+      val sparkConf = new SparkConf().setAppName("HBaseBulkDeleteExample " + tableName)
       val sc = new SparkContext(sparkConf)
       
-      var rdd = sc.hadoopFile(
-          inputFile, 
-          classOf[TextInputFormat], 
-          classOf[LongWritable], 
-          classOf[Text]).map(v => {
-            System.out.println("reading-" + v._2.toString())
-            v._2.toString()
-          })
-
+      //[Array[Byte]]
+      val rdd = sc.parallelize(Array(
+            (Bytes.toBytes("1")),
+            (Bytes.toBytes("2")),
+            (Bytes.toBytes("3")),
+            (Bytes.toBytes("4")),
+            (Bytes.toBytes("5"))
+           )
+          )
+    	
       val conf = HBaseConfiguration.create();
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
-	    conf.addResource(new Path("/etc/hbase/conf/hdfs-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
     	
       val hbaseContext = new HBaseContext(sc, conf);
-      hbaseContext.bulkPut[String](rdd, 
+      hbaseContext.bulkDelete[Array[Byte]](rdd, 
           tableName,
-          (putRecord) => {
-            System.out.println("hbase-" + putRecord)
-            val put = new Put(Bytes.toBytes("Value- " + putRecord))
-            put.add(Bytes.toBytes("c"), Bytes.toBytes("1"), Bytes.toBytes(putRecord.length()))
-            put
-          },
-          true);
+          putRecord => new Delete(putRecord),
+          4);
 	}
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.SparkHBase
+package com.cloudera.spark.hbase
 
 import org.apache.spark.rdd.RDD
 import org.apache.hadoop.conf.Configuration
@@ -38,12 +38,12 @@ import org.apache.spark.SerializableWritable
 import org.apache.hadoop.hbase.client.Mutation
 import org.apache.spark.streaming.dstream.DStream
 import java.io._
-import org.apache.spark.api.java.JavaSparkContext.fakeClassTag
 import org.apache.hadoop.security.Credentials
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
+import com.cloudera.spark.hbase.HBaseScanRDD
 
 
 /**
@@ -573,13 +573,13 @@ class HBaseContext(@transient sc: SparkContext,
       })
   }
   
-//def hbaseScanRDD(tableName: String, scan: Scan):
-//  RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
-//
-//    new HBaseScanRDD(sc, tableName, scan,
-//     broadcastedConf,
-//     credentialsConf)
-//  }
+  def hbaseScanRDD(tableName: String, scan: Scan):
+    RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
+
+      new HBaseScanRDD(sc, tableName, scan,
+       broadcastedConf,
+       credentialsConf)
+    }
   
 
   /**
@@ -674,6 +674,6 @@ class HBaseContext(@transient sc: SparkContext,
    * or security issues. For instance, an Array[AnyRef] can hold any type T, but may lose primitive
    * specialization.
    */
-  private[SparkHBase]
+  private[spark]
   def fakeClassTag[T]: ClassTag[T] = ClassTag.AnyRef.asInstanceOf[ClassTag[T]]
 }

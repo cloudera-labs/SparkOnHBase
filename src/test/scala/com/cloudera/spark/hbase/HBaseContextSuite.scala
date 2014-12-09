@@ -1,4 +1,4 @@
-package com.cloudera.SparkHBase
+package com.cloudera.spark.hbase
 
 import org.scalatest.FunSuite
 import org.apache.spark._
@@ -11,6 +11,7 @@ import org.apache.hadoop.hbase.client.HConnectionManager
 import org.apache.hadoop.hbase.client.Increment
 import org.apache.hadoop.hbase.client.Delete
 import org.apache.hadoop.hbase.client.Result
+import com.cloudera.spark.hbase.HBaseContext
 
 
 class HBaseContextSuite extends FunSuite with LocalSparkContext {

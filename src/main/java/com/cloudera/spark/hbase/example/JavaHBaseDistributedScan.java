@@ -1,4 +1,4 @@
-package com.cloudera.SparkHBase.example;
+package com.cloudera.spark.hbase.example;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import com.cloudera.SparkHBase.JavaHBaseContext;
+import com.cloudera.spark.hbase.JavaHBaseContext;
 
 import scala.Tuple2;
 import scala.Tuple3;
@@ -25,7 +25,7 @@ public class JavaHBaseDistributedScan {
 
     JavaSparkContext jsc = new JavaSparkContext(master,
         "JavaHBaseDistributedScan");
-    jsc.addJar("SparkHBase.jar");
+    jsc.addJar("spark.jar");
 
 
     Configuration conf = HBaseConfiguration.create();

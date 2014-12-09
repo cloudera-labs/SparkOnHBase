@@ -1,21 +1,14 @@
-package com.cloudera.SparkHBase;
+package com.cloudera.spark.hbase;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 
-import com.cloudera.SparkHBase.example.JavaHBaseBulkDeleteExample.DeleteFunction;
-import com.cloudera.SparkHBase.example.JavaHBaseBulkGetExample.GetFunction;
-import com.cloudera.SparkHBase.example.JavaHBaseBulkGetExample.ResultFunction;
-import com.cloudera.SparkHBase.example.JavaHBaseBulkIncrementExample.IncrementFunction;
-import com.cloudera.SparkHBase.example.JavaHBaseBulkPutExample.PutFunction;
-import com.google.common.collect.Lists;
+import com.cloudera.spark.hbase.example.JavaHBaseBulkDeleteExample.DeleteFunction;
+import com.cloudera.spark.hbase.example.JavaHBaseBulkIncrementExample.IncrementFunction;
 
 import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Get;
@@ -25,7 +18,7 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.Function;
-import com.cloudera.SparkHBase.JavaHBaseContext;
+import com.cloudera.spark.hbase.JavaHBaseContext;
 import org.junit.*;
 
 import scala.Tuple2;
@@ -44,7 +37,7 @@ public class JavaHBaseContextSuite implements Serializable {
   @Before
   public void setUp() {
     jsc = new JavaSparkContext("local", "JavaHBaseContextSuite");
-    jsc.addJar("SparkHBase.jar");
+    jsc.addJar("spark.jar");
     
     tempDir = Files.createTempDir();
     tempDir.deleteOnExit();

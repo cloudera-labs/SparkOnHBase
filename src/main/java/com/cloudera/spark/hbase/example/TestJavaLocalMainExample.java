@@ -1,4 +1,4 @@
-package com.cloudera.SparkHBase.example;
+package com.cloudera.spark.hbase.example;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.VoidFunction;
-import com.cloudera.SparkHBase.JavaHBaseContext;
+import com.cloudera.spark.hbase.JavaHBaseContext;
 import org.junit.After;
 
 import scala.Tuple2;
@@ -89,7 +89,7 @@ public class TestJavaLocalMainExample {
   
   public static void setUp() {
     jsc = new JavaSparkContext("local", "JavaHBaseContextSuite");
-    jsc.addJar("SparkHBase.jar");
+    jsc.addJar("spark.jar");
     
     tempDir = Files.createTempDir();
     tempDir.deleteOnExit();

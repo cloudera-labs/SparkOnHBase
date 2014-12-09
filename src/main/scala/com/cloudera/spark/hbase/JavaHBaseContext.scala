@@ -1,4 +1,4 @@
-package com.cloudera.SparkHBase
+package com.cloudera.spark.hbase
 
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.hadoop.conf.Configuration
@@ -9,7 +9,6 @@ import org.apache.hadoop.hbase.client.HConnection
 import org.apache.spark.streaming.api.java.JavaDStream
 import org.apache.spark.api.java.function.FlatMapFunction
 import scala.collection.JavaConversions._
-import org.apache.spark.api.java.JavaSparkContext.fakeClassTag
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.client.Increment
 import org.apache.hadoop.hbase.client.Delete
@@ -409,7 +408,7 @@ class JavaHBaseContext(@transient jsc: JavaSparkContext,
    * or security issues. For instance, an Array[AnyRef] can hold any type T, but may lose primitive
    * specialization.
    */
-  private[SparkHBase]
+  private[spark]
   def fakeClassTag[T]: ClassTag[T] = ClassTag.AnyRef.asInstanceOf[ClassTag[T]]
 
 

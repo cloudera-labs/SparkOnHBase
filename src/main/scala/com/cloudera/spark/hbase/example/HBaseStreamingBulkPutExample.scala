@@ -25,7 +25,7 @@ import org.apache.hadoop.hbase.client.Put
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.SparkConf
-import com.cloudera.SparkHBase.HBaseContext
+import com.cloudera.spark.hbase.HBaseContext
 
 object HBaseStreamingBulkPutExample {
   def main(args: Array[String]) {
@@ -45,7 +45,7 @@ object HBaseStreamingBulkPutExample {
       println("columnFamily:" + columnFamily)
       
       val sparkConf = new SparkConf().setAppName("HBaseBulkPutTimestampExample " + tableName + " " + columnFamily)
-      sparkConf.set("SparkHBase.cleaner.ttl", "120000");
+      sparkConf.set("spark.cleaner.ttl", "120000");
       val sc = new SparkContext(sparkConf)
       
       val ssc = new StreamingContext(sc, Seconds(1))

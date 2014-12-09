@@ -21,46 +21,51 @@ import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase.client.Increment
+import org.apache.hadoop.hbase.client.Put
+import org.apache.hadoop.mapred.TextInputFormat
+import org.apache.hadoop.io.LongWritable
+import org.apache.hadoop.io.Text
 import org.apache.spark.SparkConf
-import com.cloudera.SparkHBase.HBaseContext
+import com.cloudera.spark.hbase.HBaseContext
 
-object HBaseBulkIncrementExample {
+object HBaseBulkPutExampleFromFile {
   def main(args: Array[String]) {
 	  if (args.length == 0) {
-    		System.out.println("HBaseBulkIncrementExample {tableName} {columnFamily}");
+    		System.out.println("HBaseBulkPutExampleFromFile {tableName} {columnFamily} {inputFile}");
     		return;
       }
     	
-      val tableName = args(0);
-      val columnFamily = args(1);
+      val tableName = args(0)
+      val columnFamily = args(1)
+      val inputFile = args(2)
     	
-      val sparkConf = new SparkConf().setAppName("HBaseBulkIncrementExample " + tableName + " " + columnFamily)
+      val sparkConf = new SparkConf().setAppName("HBaseBulkPutExampleFromFile " + 
+          tableName + " " + columnFamily + " " + inputFile)
       val sc = new SparkContext(sparkConf)
       
-      //[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])]
-      val rdd = sc.parallelize(Array(
-            (Bytes.toBytes("1"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 1L))),
-            (Bytes.toBytes("2"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 2L))),
-            (Bytes.toBytes("3"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 3L))),
-            (Bytes.toBytes("4"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 4L))),
-            (Bytes.toBytes("5"), Array((Bytes.toBytes(columnFamily), Bytes.toBytes("counter"), 5L)))
-           )
-          );
-    	
+      var rdd = sc.hadoopFile(
+          inputFile, 
+          classOf[TextInputFormat], 
+          classOf[LongWritable], 
+          classOf[Text]).map(v => {
+            System.out.println("reading-" + v._2.toString())
+            v._2.toString()
+          })
+
       val conf = HBaseConfiguration.create();
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
+	    conf.addResource(new Path("/etc/hbase/conf/hdfs-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
     	
       val hbaseContext = new HBaseContext(sc, conf);
-      hbaseContext.bulkIncrement[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])](rdd, 
+      hbaseContext.bulkPut[String](rdd, 
           tableName,
-          (incrementRecord) => {
-            val increment = new Increment(incrementRecord._1)
-            incrementRecord._2.foreach((incrementValue) => 
-              increment.addColumn(incrementValue._1, incrementValue._2, incrementValue._3))
-            increment
+          (putRecord) => {
+            System.out.println("hbase-" + putRecord)
+            val put = new Put(Bytes.toBytes("Value- " + putRecord))
+            put.add(Bytes.toBytes("c"), Bytes.toBytes("1"), Bytes.toBytes(putRecord.length()))
+            put
           },
-          4);
+          true);
 	}
 }

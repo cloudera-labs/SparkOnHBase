@@ -23,7 +23,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.client.Put
 import org.apache.spark.SparkConf
-import com.cloudera.SparkHBase.HBaseContext
+import com.cloudera.spark.hbase.HBaseContext
 
 object HBaseBulkPutTimestampExample {
   def main(args: Array[String]) {

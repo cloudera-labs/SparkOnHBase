@@ -1,4 +1,4 @@
-package com.cloudera.SparkHBase.example;
+package com.cloudera.spark.hbase.example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import com.cloudera.SparkHBase.JavaHBaseContext;
+import com.cloudera.spark.hbase.JavaHBaseContext;
 
 public class JavaHBaseBulkDeleteExample {
   public static void main(String args[]) {
@@ -24,7 +24,7 @@ public class JavaHBaseBulkDeleteExample {
 
     JavaSparkContext jsc = new JavaSparkContext(master,
         "JavaHBaseBulkDeleteExample");
-    jsc.addJar("SparkHBase.jar");
+    jsc.addJar("spark.jar");
 
     List<byte[]> list = new ArrayList<byte[]>();
     list.add(Bytes.toBytes("1"));

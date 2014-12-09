@@ -1,4 +1,4 @@
-package com.cloudera.SparkHBase.example;
+package com.cloudera.spark.hbase.example;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -8,7 +8,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import com.cloudera.SparkHBase.JavaHBaseContext;
+import com.cloudera.spark.hbase.JavaHBaseContext;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -37,7 +37,7 @@ public class JavaHBaseStreamingBulkPutExample {
     
     JavaSparkContext jsc = new JavaSparkContext(master,
         "JavaHBaseBulkPutExample");
-    jsc.addJar("SparkHBase.jar");
+    jsc.addJar("spark.jar");
     
     JavaStreamingContext jssc = new JavaStreamingContext(jsc, new Duration(1000));
 
