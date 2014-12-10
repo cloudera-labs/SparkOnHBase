@@ -43,7 +43,6 @@ import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
-import com.cloudera.spark.hbase.HBaseScanRDD
 
 
 /**

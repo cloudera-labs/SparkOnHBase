@@ -12,7 +12,7 @@ import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.mapreduce.Job
-import org.apache.hadoop.mapreduce.SparkHadoopMapReduceUtil
+import org.apache.spark.SparkHadoopMapReduceUtilExtended
 import org.apache.spark.Logging
 import org.apache.hadoop.mapreduce.JobID
 import org.apache.hadoop.io.Writable
@@ -30,7 +30,7 @@ class HBaseScanRDD(sc: SparkContext,
   configBroadcast: Broadcast[SerializableWritable[Configuration]],
   credentialBroadcast: Broadcast[SerializableWritable[Credentials]])
   extends RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](sc, Nil)
-  with SparkHadoopMapReduceUtil
+  with SparkHadoopMapReduceUtilExtended
   with Logging {
 
   ///
