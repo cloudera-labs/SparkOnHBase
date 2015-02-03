@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.hbase.example
+package com.cloudera.spark.hbase.example
 
 import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -30,48 +30,48 @@ import com.cloudera.spark.hbase.HBaseContext
 object HBaseStreamingBulkPutExample {
   def main(args: Array[String]) {
     if (args.length == 0) {
-        System.out.println("HBaseStreamingBulkPutExample {host} {port} {tableName} {columnFamily}");
-        return;
-      }
-      
-      val host = args(0);
-      val port = args(1);
-      val tableName = args(2);
-      val columnFamily = args(3);
-      
-      println("host:" + host)
-      println("port:" + Integer.parseInt(port))
-      println("tableName:" + tableName)
-      println("columnFamily:" + columnFamily)
-      
-      val sparkConf = new SparkConf().setAppName("HBaseBulkPutTimestampExample " + tableName + " " + columnFamily)
-      sparkConf.set("spark.cleaner.ttl", "120000");
-      val sc = new SparkContext(sparkConf)
-      
-      val ssc = new StreamingContext(sc, Seconds(1))
-      
-      val lines = ssc.socketTextStream(host, port.toInt)
-      
-      val conf = HBaseConfiguration.create();
-      conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
-      conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-      
-      val hbaseContext = new HBaseContext(sc, conf);
-      
-      hbaseContext.streamBulkPut[String](lines, 
-          tableName,
-          (putRecord) => {
-            if (putRecord.length() > 0) {
-              val put = new Put(Bytes.toBytes(putRecord))
-              put.add(Bytes.toBytes("c"), Bytes.toBytes("foo"), Bytes.toBytes("bar"))
-              put
-            } else {
-              null
-            }
-          },
-          false);
-      
-      ssc.start();
+      System.out.println("HBaseStreamingBulkPutExample {host} {port} {tableName} {columnFamily}");
+      return;
+    }
+
+    val host = args(0);
+    val port = args(1);
+    val tableName = args(2);
+    val columnFamily = args(3);
+
+    println("host:" + host)
+    println("port:" + Integer.parseInt(port))
+    println("tableName:" + tableName)
+    println("columnFamily:" + columnFamily)
+
+    val sparkConf = new SparkConf().setAppName("HBaseBulkPutTimestampExample " + tableName + " " + columnFamily)
+    sparkConf.set("spark.cleaner.ttl", "120000");
+    val sc = new SparkContext(sparkConf)
+
+    val ssc = new StreamingContext(sc, Seconds(1))
+
+    val lines = ssc.socketTextStream(host, port.toInt)
+
+    val conf = HBaseConfiguration.create();
+    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
+    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
+
+    val hbaseContext = new HBaseContext(sc, conf);
+
+    hbaseContext.streamBulkPut[String](lines,
+      tableName,
+      (putRecord) => {
+        if (putRecord.length() > 0) {
+          val put = new Put(Bytes.toBytes(putRecord))
+          put.add(Bytes.toBytes("c"), Bytes.toBytes("foo"), Bytes.toBytes("bar"))
+          put
+        } else {
+          null
+        }
+      },
+      false);
+
+    ssc.start();
       
       
   }

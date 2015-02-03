@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.hbase.example
+package com.cloudera.spark.hbase.example
 
 import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -56,9 +56,9 @@ object HBaseBulkPutExampleFromFile {
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hdfs-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-    	
-      val hbaseContext = new HBaseContext(sc, conf);
-      hbaseContext.bulkPut[String](rdd, 
+
+    val hbaseContext = new HBaseContext(sc, conf);
+      hbaseContext.bulkPut[String](rdd,
           tableName,
           (putRecord) => {
             System.out.println("hbase-" + putRecord)

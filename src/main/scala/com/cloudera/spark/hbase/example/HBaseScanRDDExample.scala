@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.hbase.example
+package com.cloudera.spark.hbase.example
 
 import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -45,12 +45,12 @@ object HBaseScanRDDExample {
     conf.addResource(new Path("/etc/hbase/conf/core-site.xml"))
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"))
 
-    val hbaseContext = new HBaseContext(sc, conf)
-    
     var scan = new Scan()
     scan.setCaching(100)
-    
-    var getRdd = hbaseContext.hbaseScanRDD(tableName, scan)
+
+    val hbaseContext = new HBaseContext(sc, conf);
+
+    var getRdd = hbaseContext.hbaseScanRDD( tableName, scan)
     println(" --- abc")
     getRdd.foreach(v => println(Bytes.toString(v._1)))
     println(" --- def")

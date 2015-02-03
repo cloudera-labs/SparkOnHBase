@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.hbase.example
+package com.cloudera.spark.hbase.example
 
 import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -50,9 +50,10 @@ object HBaseBulkDeleteExample {
       val conf = HBaseConfiguration.create();
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-    	
+
       val hbaseContext = new HBaseContext(sc, conf);
-      hbaseContext.bulkDelete[Array[Byte]](rdd, 
+
+      hbaseContext.bulkDelete[Array[Byte]](rdd,
           tableName,
           putRecord => new Delete(putRecord),
           4);

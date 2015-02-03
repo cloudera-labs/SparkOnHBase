@@ -1,6 +1,6 @@
 package org.apache.spark
 
-import org.apache.hadoop.mapreduce.SparkHadoopMapReduceUtil
+import org.apache.spark.mapreduce.SparkHadoopMapReduceUtil
 
 trait SparkHadoopMapReduceUtilExtended extends SparkHadoopMapReduceUtil{
 

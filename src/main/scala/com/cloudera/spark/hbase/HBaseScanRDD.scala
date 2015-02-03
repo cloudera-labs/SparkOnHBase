@@ -1,5 +1,6 @@
 package com.cloudera.spark.hbase
 
+import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.{ SparkContext, TaskContext }
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.SerializableWritable
@@ -25,10 +26,9 @@ import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
 
 class HBaseScanRDD(sc: SparkContext,
-  @transient tableName: String,
-  @transient scan: Scan,
-  configBroadcast: Broadcast[SerializableWritable[Configuration]],
-  credentialBroadcast: Broadcast[SerializableWritable[Credentials]])
+                   @transient tableName: String,
+                   @transient scan: Scan,
+                   configBroadcast: Broadcast[SerializableWritable[Configuration]])
   extends RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](sc, Nil)
   with SparkHadoopMapReduceUtilExtended
   with Logging {
@@ -83,7 +83,7 @@ class HBaseScanRDD(sc: SparkContext,
       val split = theSplit.asInstanceOf[NewHadoopPartition]
       logInfo("Input split: " + split.serializableHadoopSplit)
       val conf = jobConfigBroadcast.value.value
-      
+
       val attemptId = newTaskAttemptID(jobTrackerId, id, isMap = true, split.index, 0)
       val hadoopAttemptContext = newTaskAttemptContext(conf, attemptId)
       val format = new TableInputFormat
@@ -135,7 +135,7 @@ class HBaseScanRDD(sc: SparkContext,
   }
 
   def addCreds {
-    val creds = credentialBroadcast.value.value
+    val creds = SparkHadoopUtil.get.getCurrentUserCredentials()
 
     val ugi = UserGroupInformation.getCurrentUser();
     ugi.addCredentials(creds)
@@ -144,9 +144,9 @@ class HBaseScanRDD(sc: SparkContext,
   }
 
   private[spark] class NewHadoopPartition(
-    rddId: Int,
-    val index: Int,
-    @transient rawSplit: InputSplit with Writable)
+                                           rddId: Int,
+                                           val index: Int,
+                                           @transient rawSplit: InputSplit with Writable)
     extends Partition {
 
     val serializableHadoopSplit = new SerializableWritable(rawSplit)

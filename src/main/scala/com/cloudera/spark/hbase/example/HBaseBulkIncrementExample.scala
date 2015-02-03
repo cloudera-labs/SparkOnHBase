@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.hbase.example
+package com.cloudera.spark.hbase.example
 
 import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -51,9 +51,9 @@ object HBaseBulkIncrementExample {
       val conf = HBaseConfiguration.create();
 	    conf.addResource(new Path("/etc/hbase/conf/core-site.xml"));
 	    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-    	
+
       val hbaseContext = new HBaseContext(sc, conf);
-      hbaseContext.bulkIncrement[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])](rdd, 
+      hbaseContext.bulkIncrement[(Array[Byte], Array[(Array[Byte], Array[Byte], Long)])](rdd,
           tableName,
           (incrementRecord) => {
             val increment = new Increment(incrementRecord._1)

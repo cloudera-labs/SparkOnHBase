@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.hbase.example
+package com.cloudera.spark.hbase.example
 
 import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -54,7 +54,7 @@ object HBaseBulkGetExample {
     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"))
 
     val hbaseContext = new HBaseContext(sc, conf);
-    
+
     val getRdd = hbaseContext.bulkGet[Array[Byte], String](
       tableName,
       2,

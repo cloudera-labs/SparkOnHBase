@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.hbase.example
+package com.cloudera.spark.hbase.example
 
 import org.apache.spark.SparkContext
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -53,6 +53,7 @@ object HBaseBulkPutTimestampExample {
     val timeStamp = System.currentTimeMillis()
 
     val hbaseContext = new HBaseContext(sc, conf);
+
     hbaseContext.bulkPut[(Array[Byte], Array[(Array[Byte], Array[Byte], Array[Byte])])](rdd,
       tableName,
       (putRecord) => {
