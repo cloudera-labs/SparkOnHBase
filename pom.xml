@@ -4,7 +4,7 @@
 
 	<groupId>com.cloudera</groupId>
 	<artifactId>spark-hbase</artifactId>
-	<version>0.0.2-clabs-SNAPSHOT</version>
+	<version>0.0.2-clabs</version>
 	<packaging>jar</packaging>
 
 	<name>Spark HBase Integration</name>
