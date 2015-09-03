@@ -46,6 +46,8 @@ class HBaseScanRDD(sc: SparkContext,
   @transient val jobConfigurationTrans = jobTransient.getConfiguration()
   jobConfigurationTrans.set(TableInputFormat.INPUT_TABLE, tableName)
   val jobConfigBroadcast = sc.broadcast(new SerializableWritable(jobConfigurationTrans))
+  val jobCredentialBroadcast = sc.broadcast(new SerializableWritable(jobTransient.getCredentials()))
+
   ////
 
   private val jobTrackerId: String = {
@@ -137,10 +139,12 @@ class HBaseScanRDD(sc: SparkContext,
   def addCreds {
     val creds = SparkHadoopUtil.get.getCurrentUserCredentials()
 
-    val ugi = UserGroupInformation.getCurrentUser();
+    @transient val ugi = UserGroupInformation.getCurrentUser();
     ugi.addCredentials(creds)
-    // specify that this is a proxy user 
+    // specify that this is a proxy user
     ugi.setAuthenticationMethod(AuthenticationMethod.PROXY)
+
+    ugi.addCredentials(jobCredentialBroadcast.value.value)
   }
 
   private[spark] class NewHadoopPartition(
