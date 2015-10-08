@@ -17,32 +17,20 @@
 
 package com.cloudera.spark.hbase
 
+import java.util.ArrayList
+
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.hbase.client.{Delete, Get, HConnection, HConnectionManager, Increment, Mutation, Put, Result, Scan}
+import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil
+import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.rdd.RDD
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.HConnectionManager
-import org.apache.hadoop.hbase.client.Scan
-import org.apache.hadoop.hbase.client.Get
-import java.util.ArrayList
-import org.apache.hadoop.hbase.client.Result
-import scala.reflect.ClassTag
-import org.apache.hadoop.hbase.client.HConnection
-import org.apache.hadoop.hbase.client.Put
-import org.apache.hadoop.hbase.client.Increment
-import org.apache.hadoop.hbase.client.Delete
-import org.apache.spark.{Logging, SerializableWritable, SparkConf, SparkContext}
-import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.mapreduce.Job
-import org.apache.hadoop.hbase.client.Mutation
 import org.apache.spark.streaming.dstream.DStream
-import java.io._
-import org.apache.hadoop.security.{Credentials, UserGroupInformation}
-import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
-import org.apache.hadoop.fs.{Path, FileSystem}
+import org.apache.spark.{Logging, SerializableWritable, SparkContext}
+
+import scala.reflect.ClassTag
 
 
 /**
@@ -61,13 +49,11 @@ class HBaseContext(@transient sc: SparkContext,
                     val tmpHdfsConfgFile: String = null) extends Serializable with Logging {
 
 
-  @transient var credentials = SparkHadoopUtil.get.getCurrentUserCredentials()
   @transient var tmpHdfsConfiguration:Configuration = config
-  @transient var appliedCredentials = false;
-  @transient val job = new Job(config)
+  @transient val job = Job.getInstance(config)
   TableMapReduceUtil.initCredentials(job)
   val broadcastedConf = sc.broadcast(new SerializableWritable(config))
-  val credentialsConf = sc.broadcast(new SerializableWritable(job.getCredentials()))
+  val credentialsConf = sc.broadcast(new SerializableWritable(job.getCredentials))
 
   if (tmpHdfsConfgFile != null && config != null) {
     val fs = FileSystem.newInstance(config)
@@ -75,7 +61,7 @@ class HBaseContext(@transient sc: SparkContext,
     if (!fs.exists(tmpPath)) {
       val outputStream = fs.create(tmpPath)
       config.write(outputStream)
-      outputStream.close();
+      outputStream.close()
     } else {
       logWarning("tmpHdfsConfigDir " + tmpHdfsConfgFile + " exist!!")
     }
@@ -204,37 +190,6 @@ class HBaseContext(@transient sc: SparkContext,
           htable.flushCommits()
           htable.close()
         }))
-  }
-
-  def applyCreds[T] (configBroadcast: Broadcast[SerializableWritable[Configuration]]){
-
-
-    credentials = SparkHadoopUtil.get.getCurrentUserCredentials()
-
-    logInfo("appliedCredentials:" + appliedCredentials + ",credentials:" + credentials);
-
-    if (appliedCredentials == false && credentials != null) {
-      appliedCredentials = true
-      logCredInformation(credentials)
-
-      @transient val ugi = UserGroupInformation.getCurrentUser();
-      ugi.addCredentials(credentials)
-      // specify that this is a proxy user
-      ugi.setAuthenticationMethod(AuthenticationMethod.PROXY)
-
-      ugi.addCredentials(credentialsConf.value.value)
-    }
-  }
-
-  def logCredInformation[T] (credentials2:Credentials) {
-    logInfo("credentials:" + credentials2);
-    for (a <- 0 until credentials2.getAllSecretKeys.size()) {
-      logInfo("getAllSecretKeys:" + a + ":" + credentials2.getAllSecretKeys.get(a));
-    }
-    val it = credentials2.getAllTokens.iterator();
-    while (it.hasNext) {
-      logInfo("getAllTokens:" + it.next());
-    }
   }
 
   /**
@@ -563,57 +518,14 @@ class HBaseContext(@transient sc: SparkContext,
    *
    *  @param tableName the name of the table to scan
    *  @param scan      the HBase scan object to use to read data from HBase
-   *  @param f         function to convert a Result object from HBase into
-   *                   what the user wants in the final generated RDD
    *  @return          new RDD with results from scan
    */
-  def hbaseRDD[U: ClassTag](tableName: String, scan: Scan, f: ((ImmutableBytesWritable, Result)) => U): RDD[U] = {
-
-    var job: Job = new Job(getConf(broadcastedConf))
-
-    TableMapReduceUtil.initCredentials(job)
-    TableMapReduceUtil.initTableMapperJob(tableName, scan, classOf[IdentityTableMapper], null, null, job)
-
-    sc.newAPIHadoopRDD(job.getConfiguration(),
-      classOf[TableInputFormat],
-      classOf[ImmutableBytesWritable],
-      classOf[Result]).map(f)
-  }
-
-
-  /**
-   * A overloaded version of HBaseContext hbaseRDD that predefines the
-   * type of the outputing RDD
-   *
-   *  @param tableName the name of the table to scan
-   *  @param scans      the HBase scan object to use to read data from HBase
-   *  @return New RDD with results from scan
-   *
-   */
-  def hbaseRDD(tableName: String, scans: Scan):
-  RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
-
-    hbaseRDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](
-      tableName,
-      scans,
-      (r: (ImmutableBytesWritable, Result)) => {
-        val it = r._2.list().iterator()
-        val list = new ArrayList[(Array[Byte], Array[Byte], Array[Byte])]()
-
-        while (it.hasNext()) {
-          val kv = it.next()
-          list.add((kv.getFamily(), kv.getQualifier(), kv.getValue()))
-        }
-
-        (r._1.copyBytes(), list)
-      })
-  }
 
   def hbaseScanRDD(tableName: String, scan: Scan):
   RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
 
     new HBaseScanRDD(sc, tableName, scan,
-      broadcastedConf)
+      broadcastedConf, credentialsConf)
   }
 
 
@@ -629,7 +541,7 @@ class HBaseContext(@transient sc: SparkContext,
     val config = getConf(configBroadcast)
 
 
-    applyCreds(configBroadcast)
+    Security.applyCreds(credentialsConf.value.value)
     // specify that this is a proxy user
     val hConnection = HConnectionManager.createConnection(config)
     f(it, hConnection)
@@ -682,7 +594,7 @@ class HBaseContext(@transient sc: SparkContext,
                                        mp: (Iterator[K], HConnection) => Iterator[U]): Iterator[U] = {
 
     val config = getConf(configBroadcast)
-    applyCreds(configBroadcast)
+    Security.applyCreds(credentialsConf.value.value)
     val hConnection = HConnectionManager.createConnection(config)
 
     val res = mp(it, hConnection)

@@ -1,40 +1,30 @@
 package com.cloudera.spark.hbase
 
-import org.apache.spark.deploy.SparkHadoopUtil
-import org.apache.spark.{ SparkContext, TaskContext }
-import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.SerializableWritable
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.security.Credentials
-import org.apache.spark.rdd.RDD
-import org.apache.spark.Partition
-import org.apache.spark.InterruptibleIterator
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil
-import org.apache.hadoop.hbase.client.Scan
-import org.apache.hadoop.mapreduce.Job
-import org.apache.spark.SparkHadoopMapReduceUtilExtended
-import org.apache.spark.Logging
-import org.apache.hadoop.mapreduce.JobID
-import org.apache.hadoop.io.Writable
-import org.apache.hadoop.mapreduce.InputSplit
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.ArrayList
-import org.apache.hadoop.security.UserGroupInformation
-import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
-import org.apache.hadoop.hbase.mapreduce.IdentityTableMapper
+import java.util.{ArrayList, Date}
+
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.hbase.client.Scan
+import org.apache.hadoop.hbase.mapreduce.{IdentityTableMapper, TableInputFormat, TableMapReduceUtil}
+import org.apache.hadoop.io.Writable
+import org.apache.hadoop.mapreduce.{InputSplit, Job, JobID}
+import org.apache.hadoop.security.Credentials
+import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.rdd.RDD
+import org.apache.spark.{InterruptibleIterator, Logging, Partition, SerializableWritable, SparkContext, SparkHadoopMapReduceUtilExtended, TaskContext}
 
 class HBaseScanRDD(sc: SparkContext,
                    @transient tableName: String,
                    @transient scan: Scan,
-                   configBroadcast: Broadcast[SerializableWritable[Configuration]])
+                   configBroadcast: Broadcast[SerializableWritable[Configuration]],
+                   credentialsBroadcast : Broadcast[SerializableWritable[Credentials]])
   extends RDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])](sc, Nil)
   with SparkHadoopMapReduceUtilExtended
   with Logging {
 
-  ///
-  @transient val jobTransient = new Job(configBroadcast.value.value, "ExampleRead");
+  Security.applyCreds(credentialsBroadcast.value.value)
+  @transient val jobTransient = Job.getInstance(configBroadcast.value.value, "ExampleRead");
+  TableMapReduceUtil.initCredentials(jobTransient)
   TableMapReduceUtil.initTableMapperJob(
     tableName, // input HBase table name
     scan, // Scan instance to control CF and attribute selection
@@ -57,7 +47,7 @@ class HBaseScanRDD(sc: SparkContext,
 
   override def getPartitions: Array[Partition] = {
 
-    addCreds
+    Security.applyCreds(credentialsBroadcast.value.value)
 
     val tableInputFormat = new TableInputFormat
     tableInputFormat.setConf(jobConfigBroadcast.value.value)
@@ -74,11 +64,11 @@ class HBaseScanRDD(sc: SparkContext,
 
   override def compute(theSplit: Partition, context: TaskContext): InterruptibleIterator[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
 
-    addCreds
+    Security.applyCreds(credentialsBroadcast.value.value)
 
     val iter = new Iterator[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] {
 
-      addCreds
+      Security.applyCreds(credentialsBroadcast.value.value)
 
       val split = theSplit.asInstanceOf[NewHadoopPartition]
       logInfo("Input split: " + split.serializableHadoopSplit)
@@ -132,15 +122,6 @@ class HBaseScanRDD(sc: SparkContext,
       }
     }
     new InterruptibleIterator(context, iter)
-  }
-
-  def addCreds {
-    val creds = SparkHadoopUtil.get.getCurrentUserCredentials()
-
-    val ugi = UserGroupInformation.getCurrentUser();
-    ugi.addCredentials(creds)
-    // specify that this is a proxy user 
-    ugi.setAuthenticationMethod(AuthenticationMethod.PROXY)
   }
 
   private[spark] class NewHadoopPartition(

@@ -1,21 +1,12 @@
 package com.cloudera.spark.hbase
 
-import org.apache.spark.api.java.JavaSparkContext
 import org.apache.hadoop.conf.Configuration
-import org.apache.spark.api.java.JavaRDD
-import org.apache.spark.api.java.function.VoidFunction
-import org.apache.spark.api.java.function.Function
-import org.apache.hadoop.hbase.client.HConnection
+import org.apache.hadoop.hbase.client.{Delete, Get, HConnection, Increment, Put, Result, Scan}
+import org.apache.spark.api.java.{JavaRDD, JavaSparkContext}
+import org.apache.spark.api.java.function.{FlatMapFunction, Function, VoidFunction}
 import org.apache.spark.streaming.api.java.JavaDStream
-import org.apache.spark.api.java.function.FlatMapFunction
+
 import scala.collection.JavaConversions._
-import org.apache.hadoop.hbase.client.Put
-import org.apache.hadoop.hbase.client.Increment
-import org.apache.hadoop.hbase.client.Delete
-import org.apache.hadoop.hbase.client.Get
-import org.apache.hadoop.hbase.client.Result
-import org.apache.hadoop.hbase.client.Scan
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import scala.reflect.ClassTag
 
 class JavaHBaseContext(@transient jsc: JavaSparkContext,
@@ -362,39 +353,19 @@ class JavaHBaseContext(@transient jsc: JavaSparkContext,
         (r:Result) => convertResult.call(r) )(fakeClassTag[U]))(fakeClassTag[U])
   }
    
+
   /**
-   * This function will use the native HBase TableInputFormat with the
-   * given scan object to generate a new JavaRDD
-   *
-   *  @param tableName the name of the table to scan
-   *  @param scans      the HBase scan object to use to read data from HBase
-   *  @param f         function to convert a Result object from HBase into
-   *                   what the user wants in the final generated JavaRDD
-   *  @return          new JavaRDD with results from scan
-   */
-  def hbaseRDD[U](tableName: String, 
-      scans: Scan,
-      f: Function[(ImmutableBytesWritable, Result), U]): 
-      JavaRDD[U] = {
-    JavaRDD.fromRDD(
-        hbc.hbaseRDD[U](tableName, 
-            scans, 
-            (v:(ImmutableBytesWritable, Result)) => 
-              f.call(v._1, v._2))(fakeClassTag[U]))(fakeClassTag[U])
-  } 
-  
-  /**
-   * A overloaded version of HBaseContext hbaseRDD that predefines the
+   * A overloaded version of HBaseContext hbaseScanRDD that predefines the
    * type of the outputing JavaRDD
    *
    *  @param tableName the name of the table to scan
-   *  @param scans      the HBase scan object to use to read data from HBase
+   *  @param scan      the HBase scan object to use to read data from HBase
    *  @return New JavaRDD with results from scan
    *
    */
-  def hbaseRDD(tableName: String, 
-      scans: Scan): JavaRDD[(Array[Byte], java.util.List[(Array[Byte], Array[Byte], Array[Byte])])] = {
-    JavaRDD.fromRDD(hbc.hbaseRDD(tableName, scans))
+
+  def hbaseScanRDD(tableName: String, scan: Scan) = {
+    JavaRDD.fromRDD(hbc.hbaseScanRDD(tableName,scan))
   }
 
   /**
