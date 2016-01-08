@@ -233,7 +233,8 @@ class HBaseContext(@transient sc: SparkContext,
     }
     val it = credentials2.getAllTokens.iterator();
     while (it.hasNext) {
-      logInfo("getAllTokens:" + it.next());
+      val newToken = it.next
+      logInfo("getAllTokens:" + newToken);
     }
   }
 
