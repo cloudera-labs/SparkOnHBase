@@ -1,9 +1,15 @@
+:warning: The Spark On HBase project in Cloudera Labs got merged into the upstream HBase project in 2015 and a backport of that has shipped with CDH since CDH 5.7
+
+https://blog.cloudera.com/blog/2015/08/apache-spark-comes-to-apache-hbase-with-hbase-spark-module/
+---
+
+
 # SparkOnHBase
 ## Overview
 This is a simple reusable lib for working with HBase with Spark
 
 
-##Functionality
+## Functionality
 Current functionality supports the following functions
 
 * bulkPut
@@ -19,14 +25,14 @@ Current functionality supports the following functions
 * Java Examples
 * Java Unit Tests
 
-##Near Future
+## Near Future
 * More unit test
 * More Examples
 * Python APIs
 * Python Examples
 * Python Unit Test
 
-##Far Future
+## Far Future
 
 * Partitioned Bulk Put/Mutation
 * Sorted Partitioned Bulk Get
@@ -34,51 +40,51 @@ Current functionality supports the following functions
 * Spark implementation of HBase copyTable
 
 
-##Build
+## Build
 mvn clean package
 
-##CDH setup
+## CDH setup
 Testing was done on CDH 5.0.2
 
 Just put hbase-protocol-*.jar in /opt/cloudera/parcels/CDH/lib/spark/assembly/lib/ and bunced
 
 /opt/cloudera/parcels/CDH/lib/spark/assembly/lib
 
-##Examples
+## Examples
 SparkOnHBase comes with a number of examples.  Here is the CLI commands to try them out.  These work with a table named 't1' and columnfmaily 'c'
 
 create 't1', 'c'
 
 export HADOOP_CLASSPATH=/opt/cloudera/parcels/CDH/lib/hbase/lib/*:/opt/cloudera/parcels/CDH/lib/hbase/lib/hbase-protocol-0.98.6-cdh5.3.0.jar:/etc/hbase/conf
 
-###Bulk Put Timestamp: works on kerberos and non-kerberos
+### Bulk Put Timestamp: works on kerberos and non-kerberos
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseBulkPutExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseBulkPutExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
-###Bulk Put Timestamp: works on kerberos and non-kerberos
+### Bulk Put Timestamp: works on kerberos and non-kerberos
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseBulkPutTimestampExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
-###Bulk Get: works on kerberos and non-kerberos
+### Bulk Get: works on kerberos and non-kerberos
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseBulkGetExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
-###Bulk Increment: works on kerberos and non-kerberos
+### Bulk Increment: works on kerberos and non-kerberos
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseBulkIncrementExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
-###Bulk Delete: works on kerberos and non-kerberos
+### Bulk Delete: works on kerberos and non-kerberos
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseBulkDeleteExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
-###Scan that works on Kerberos
+### Scan that works on Kerberos
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseScanRDDExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
 
-###Old Scan that doesn't work on Kerberos
+### Old Scan that doesn't work on Kerberos
 
 spark-submit --jars /opt/cloudera/parcels/CDH/lib/zookeeper/zookeeper-3.4.5-cdh5.3.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/guava-12.0.1.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/protobuf-java-2.5.0.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-protocol.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-client.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-common.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop2-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-hadoop-compat.jar,/opt/cloudera/parcels/CDH/lib/hbase/hbase-server.jar,/opt/cloudera/parcels/CDH/lib/hbase/lib/htrace-core.jar --class com.cloudera.spark.hbase.example.HBaseDistributedScanExample --master yarn --deploy-mode client --executor-memory 512M --num-executors 4 --driver-java-options -Dspark.executor.extraClassPath=/opt/cloudera/parcels/CDH/lib/hbase/lib/* SparkHBase.jar t1 c
 
